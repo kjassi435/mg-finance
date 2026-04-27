@@ -1,0 +1,168 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import { useAppStore } from '@/lib/store'
+import {
+  Landmark,
+  Briefcase,
+  Car,
+  Home,
+  Gem,
+  ArrowRight,
+} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+
+const loanTypes = [
+  {
+    id: 'MUDRA',
+    name: 'Mudra Loan',
+    hindiName: 'प्रधान मंत्री मुद्रा योजना',
+    description: 'Government-backed loan for small businesses and micro enterprises. No collateral needed.',
+    maxAmount: '₹10 Lakh',
+    interestRate: '8% - 12%',
+    icon: Landmark,
+    color: 'bg-emerald-100 text-emerald-700',
+  },
+  {
+    id: 'BUSINESS',
+    name: 'Business Loan',
+    hindiName: 'व्यापार लोन',
+    description: 'Grow your business with our flexible business loans. Quick disbursement.',
+    maxAmount: '₹50 Lakh',
+    interestRate: '10% - 18%',
+    icon: Briefcase,
+    color: 'bg-amber-100 text-amber-700',
+  },
+  {
+    id: 'USED_CAR',
+    name: 'Used Car Loan',
+    hindiName: 'पुरानी गाड़ी लोन',
+    description: 'Finance your dream car with our competitive used car loan rates.',
+    maxAmount: '₹20 Lakh',
+    interestRate: '12% - 16%',
+    icon: Car,
+    color: 'bg-sky-100 text-sky-700',
+  },
+  {
+    id: 'HOME',
+    name: 'Home Loan',
+    hindiName: 'होम लोन',
+    description: 'Make your dream home a reality with our affordable home loan solutions.',
+    maxAmount: '₹1 Crore',
+    interestRate: '8.5% - 14%',
+    icon: Home,
+    color: 'bg-rose-100 text-rose-700',
+  },
+  {
+    id: 'GOLD',
+    name: 'Gold Loan',
+    hindiName: 'सोने का लोन',
+    description: 'Instant loan against your gold ornaments. Quick processing, minimal documents.',
+    maxAmount: '₹25 Lakh',
+    interestRate: '10% - 15%',
+    icon: Gem,
+    color: 'bg-yellow-100 text-yellow-700',
+  },
+]
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 },
+}
+
+export function LoanTypes() {
+  const { navigate, setSelectedLoanType } = useAppStore()
+
+  const handleApply = (loanId: string) => {
+    setSelectedLoanType(loanId)
+    navigate('apply')
+  }
+
+  return (
+    <section className="py-16 md:py-24 bg-background">
+      <div className="container mx-auto px-4">
+        {/* Section Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <span className="inline-block px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full mb-3">
+            Our Loan Products
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+            हर ज़रूरत के लिए लोन
+          </h2>
+          <p className="text-gray-500 max-w-2xl mx-auto">
+            Loan for every need — from business expansion to buying your dream home.
+            Choose the right loan type for you.
+          </p>
+        </motion.div>
+
+        {/* Loan Cards Grid */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6"
+        >
+          {loanTypes.map((loan) => {
+            const Icon = loan.icon
+            return (
+              <motion.div key={loan.id} variants={cardVariants}>
+                <Card className="group h-full border border-gray-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300 cursor-pointer">
+                  <CardContent className="p-5 flex flex-col h-full">
+                    {/* Icon */}
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${loan.color}`}>
+                      <Icon className="h-6 w-6" />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="font-bold text-gray-900 text-lg mb-1">{loan.name}</h3>
+                    <p className="text-xs text-emerald-600 font-medium mb-3">{loan.hindiName}</p>
+
+                    {/* Description */}
+                    <p className="text-sm text-gray-500 mb-4 flex-grow">{loan.description}</p>
+
+                    {/* Stats */}
+                    <div className="space-y-2 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">Max Amount</span>
+                        <span className="font-semibold text-gray-700">{loan.maxAmount}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">Interest Rate</span>
+                        <span className="font-semibold text-emerald-600">{loan.interestRate}</span>
+                      </div>
+                    </div>
+
+                    {/* Apply Button */}
+                    <Button
+                      onClick={() => handleApply(loan.id)}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white group-hover:shadow-md transition-all"
+                      size="sm"
+                    >
+                      Apply Now
+                      <ArrowRight className="ml-1.5 h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )
+          })}
+        </motion.div>
+      </div>
+    </section>
+  )
+}

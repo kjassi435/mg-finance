@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      String   @default("USER") // USER or ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications LoanApplication[]
+}
+
+model LoanApplication {
+  id                String   @id @default(cuid())
+  applicationId     String   @unique // Unique application reference like MG-2024-001
+  userId            String
+  loanType          String   // MUDRA, BUSINESS, USED_CAR, HOME, GOLD
+  loanAmount        Float
+  interestRate      Float
+  tenure            Int      // months
+  monthlyEmi        Float?
+
+  // Personal Details
+  fullName          String
+  email             String
+  phone             String
+  dateOfBirth       String?
+  gender            String?
+  address           String?
+  city              String?
+  state             String?
+  pincode           String?
+
+  // Employment Details
+  employmentType    String?  // SALARIED, SELF_EMPLOYED, BUSINESS
+  employerName      String?
+  monthlyIncome     Float?
+  workExperience    String?
+
+  // Document Info (stored as text references, simulated uploads)
+  aadhaarNumber     String?
+  panNumber         String?
+  itrFiled          Boolean  @default(false)
+  documentsUploaded String?  // JSON string of uploaded doc names
+
+  // Application Status
+  status            String   @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, REJECTED
+  rejectionReason   String?
+  processingFeePaid Boolean  @default(false)
+
+  // Notification tracking
+  notificationSent  String?  // JSON of sent notifications
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
