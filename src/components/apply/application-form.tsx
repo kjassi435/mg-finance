@@ -12,8 +12,10 @@ import {
   FileText,
   CheckCircle2,
   CreditCard,
+  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
@@ -22,6 +24,7 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Separator } from '@/components/ui/separator'
+import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 
 const LOAN_TYPES = [
@@ -40,6 +43,14 @@ const STEPS = [
   { title: 'Review & Submit', icon: CheckCircle2 },
 ]
 
+const DOC_CHECKLIST_ITEMS = [
+  { key: 'aadhaarCard', label: 'Aadhaar Card' },
+  { key: 'panCard', label: 'PAN Card' },
+  { key: 'bankStatement', label: 'Bank Statement (Last 6 Months)' },
+  { key: 'salarySlip', label: 'Salary Slip / Income Proof' },
+  { key: 'passportPhoto', label: 'Passport Size Photo' },
+]
+
 function calculateEMI(principal: number, annualRate: number, tenureMonths: number): number {
   const r = annualRate / 12 / 100
   if (r === 0) return principal / tenureMonths
@@ -55,29 +66,41 @@ function formatCurrency(num: number): string {
 interface FormData {
   // Personal
   fullName: string
+  fatherName: string
   email: string
   phone: string
+  alternatePhone: string
   dateOfBirth: string
   gender: string
   address: string
   city: string
   state: string
   pincode: string
+  permanentAddress: string
   // Loan
   loanType: string
   loanAmount: number
   interestRate: number
   tenure: number
+  loanPurpose: string
   // Employment
   employmentType: string
   employerName: string
   monthlyIncome: string
   workExperience: string
+  existingLoan: string
+  existingLoanDetails: string
+  existingEmi: string
+  approxCibilScore: string
   // Documents
   aadhaarNumber: string
   panNumber: string
   itrFiled: boolean
   documents: string[]
+  docChecklist: Record<string, boolean>
+  // Declarations
+  declarationAccepted: boolean
+  serviceFeeAccepted: boolean
 }
 
 export function ApplicationForm() {
@@ -85,34 +108,51 @@ export function ApplicationForm() {
   const { toast } = useToast()
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [feePaid, setFeePaid] = useState(false)
 
   const [form, setForm] = useState<FormData>({
     fullName: user?.name || '',
+    fatherName: '',
     email: user?.email || '',
     phone: '',
+    alternatePhone: '',
     dateOfBirth: '',
     gender: '',
     address: '',
     city: 'Dehradun',
     state: 'Uttarakhand',
     pincode: '',
+    permanentAddress: '',
     loanType: selectedLoanType || '',
     loanAmount: 500000,
     interestRate: 12,
     tenure: 60,
+    loanPurpose: '',
     employmentType: '',
     employerName: '',
     monthlyIncome: '',
     workExperience: '',
+    existingLoan: '',
+    existingLoanDetails: '',
+    existingEmi: '',
+    approxCibilScore: '',
     aadhaarNumber: '',
     panNumber: '',
     itrFiled: false,
     documents: [],
+    docChecklist: {},
+    declarationAccepted: false,
+    serviceFeeAccepted: false,
   })
 
-  const updateField = (field: keyof FormData, value: string | number | boolean | string[]) => {
+  const updateField = (field: keyof FormData, value: string | number | boolean | string[] | Record<string, boolean>) => {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const toggleDocChecklist = (key: string) => {
+    setForm((prev) => ({
+      ...prev,
+      docChecklist: { ...prev.docChecklist, [key]: !prev.docChecklist[key] },
+    }))
   }
 
   const emi = useMemo(
@@ -188,19 +228,7 @@ export function ApplicationForm() {
     }))
   }
 
-  const handlePayFee = async () => {
-    if (!feePaid) {
-      setFeePaid(true)
-      toast({ title: 'Processing Fee Paid', description: '₹499 processing fee has been paid successfully.' })
-    }
-  }
-
   const handleSubmit = async () => {
-    if (!feePaid) {
-      toast({ title: 'Fee Required', description: 'Please pay the processing fee first.', variant: 'destructive' })
-      return
-    }
-
     if (!user) {
       toast({ title: 'Login Required', description: 'Please login to submit an application.', variant: 'destructive' })
       navigate('login')
@@ -237,6 +265,18 @@ export function ApplicationForm() {
           panNumber: form.panNumber || null,
           itrFiled: form.itrFiled,
           documentsUploaded: JSON.stringify(form.documents),
+          fatherName: form.fatherName || null,
+          alternatePhone: form.alternatePhone || null,
+          permanentAddress: form.permanentAddress || null,
+          loanPurpose: form.loanPurpose || null,
+          existingLoan: form.existingLoan || null,
+          existingLoanDetails: form.existingLoanDetails || null,
+          existingEmi: form.existingEmi || null,
+          approxCibilScore: form.approxCibilScore || null,
+          bankStatement: !!form.docChecklist.bankStatement,
+          salarySlip: !!form.docChecklist.salarySlip,
+          passportPhoto: !!form.docChecklist.passportPhoto,
+          declarationAccepted: form.declarationAccepted,
         }),
       })
 
@@ -249,7 +289,7 @@ export function ApplicationForm() {
 
       setApplicationId(data.application.applicationId)
       setSelectedLoanType(null)
-      toast({ title: 'Application Submitted! 🎉', description: `Your application ${data.application.applicationId} has been received.` })
+      toast({ title: 'Application Submitted!', description: `Your application ${data.application.applicationId} has been received.` })
       navigate('apply-success')
     } catch {
       toast({ title: 'Error', description: 'Network error. Please try again.', variant: 'destructive' })
@@ -259,6 +299,7 @@ export function ApplicationForm() {
   }
 
   const currentLoanInfo = LOAN_TYPES.find((l) => l.value === form.loanType)
+  const canSubmit = form.declarationAccepted && form.serviceFeeAccepted
 
   return (
     <div className="min-h-screen bg-background">
@@ -266,7 +307,7 @@ export function ApplicationForm() {
         {/* Back Button */}
         <button
           onClick={() => navigate('landing')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-emerald-600 mb-6 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-blue-600 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
@@ -291,9 +332,9 @@ export function ApplicationForm() {
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                         i < step
-                          ? 'bg-emerald-600 text-white'
+                          ? 'bg-blue-700 text-white'
                           : i === step
-                          ? 'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-500'
+                          ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-500'
                           : 'bg-gray-100 text-gray-400'
                       }`}
                     >
@@ -305,7 +346,7 @@ export function ApplicationForm() {
                     </div>
                     <span
                       className={`text-xs font-medium hidden sm:block ${
-                        i <= step ? 'text-emerald-700' : 'text-gray-400'
+                        i <= step ? 'text-blue-700' : 'text-gray-400'
                       }`}
                     >
                       {s.title}
@@ -326,7 +367,7 @@ export function ApplicationForm() {
                   <h2 className="text-xl font-bold text-gray-900 mb-4">Personal Details</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2 sm:col-span-2">
-                      <Label htmlFor="fullName">Full Name *</Label>
+                      <Label htmlFor="fullName" className="text-blue-700">Full Name *</Label>
                       <Input
                         id="fullName"
                         value={form.fullName}
@@ -335,8 +376,18 @@ export function ApplicationForm() {
                         className="h-11"
                       />
                     </div>
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label htmlFor="fatherName" className="text-blue-700">Father&apos;s / Husband&apos;s Name</Label>
+                      <Input
+                        id="fatherName"
+                        value={form.fatherName}
+                        onChange={(e) => updateField('fatherName', e.target.value)}
+                        placeholder="पिता / पति का नाम"
+                        className="h-11"
+                      />
+                    </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email" className="text-blue-700">Email *</Label>
                       <Input
                         id="email"
                         type="email"
@@ -347,7 +398,7 @@ export function ApplicationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone *</Label>
+                      <Label htmlFor="phone" className="text-blue-700">Mobile Number *</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -358,7 +409,18 @@ export function ApplicationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="dob">Date of Birth</Label>
+                      <Label htmlFor="alternatePhone" className="text-blue-700">Alternate Number</Label>
+                      <Input
+                        id="alternatePhone"
+                        type="tel"
+                        value={form.alternatePhone}
+                        onChange={(e) => updateField('alternatePhone', e.target.value)}
+                        placeholder="+91 98765 00000"
+                        className="h-11"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="dob" className="text-blue-700">Date of Birth</Label>
                       <Input
                         id="dob"
                         type="date"
@@ -368,7 +430,7 @@ export function ApplicationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Gender</Label>
+                      <Label className="text-blue-700">Gender</Label>
                       <Select value={form.gender} onValueChange={(v) => updateField('gender', v)}>
                         <SelectTrigger className="h-11">
                           <SelectValue placeholder="Select gender" />
@@ -381,7 +443,7 @@ export function ApplicationForm() {
                       </Select>
                     </div>
                     <div className="space-y-2 sm:col-span-2">
-                      <Label htmlFor="address">Address</Label>
+                      <Label htmlFor="address" className="text-blue-700">Current Address</Label>
                       <Input
                         id="address"
                         value={form.address}
@@ -391,7 +453,7 @@ export function ApplicationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="city">City</Label>
+                      <Label htmlFor="city" className="text-blue-700">City</Label>
                       <Input
                         id="city"
                         value={form.city}
@@ -400,7 +462,7 @@ export function ApplicationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="state">State</Label>
+                      <Label htmlFor="state" className="text-blue-700">State</Label>
                       <Input
                         id="state"
                         value={form.state}
@@ -409,13 +471,24 @@ export function ApplicationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="pincode">Pincode</Label>
+                      <Label htmlFor="pincode" className="text-blue-700">Pincode</Label>
                       <Input
                         id="pincode"
                         value={form.pincode}
                         onChange={(e) => updateField('pincode', e.target.value)}
                         placeholder="248001"
                         className="h-11"
+                      />
+                    </div>
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label htmlFor="permanentAddress" className="text-blue-700">Permanent Address</Label>
+                      <Textarea
+                        id="permanentAddress"
+                        value={form.permanentAddress}
+                        onChange={(e) => updateField('permanentAddress', e.target.value)}
+                        placeholder="If different from current address / यदि वर्तमान पते से अलग हो"
+                        rows={2}
+                        className="resize-none"
                       />
                     </div>
                   </div>
@@ -428,7 +501,7 @@ export function ApplicationForm() {
                   <h2 className="text-xl font-bold text-gray-900 mb-4">Loan Details</h2>
 
                   <div className="space-y-2">
-                    <Label>Loan Type *</Label>
+                    <Label className="text-blue-700">Loan Type *</Label>
                     <Select value={form.loanType} onValueChange={handleLoanTypeChange}>
                       <SelectTrigger className="h-11">
                         <SelectValue placeholder="Select loan type" />
@@ -444,8 +517,8 @@ export function ApplicationForm() {
                   </div>
 
                   {currentLoanInfo && (
-                    <div className="p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                      <p className="text-sm text-emerald-700">
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                      <p className="text-sm text-blue-700">
                         <strong>Interest Rate Range:</strong> {currentLoanInfo.minRate}% - {currentLoanInfo.maxRate}% p.a.
                       </p>
                     </div>
@@ -453,8 +526,8 @@ export function ApplicationForm() {
 
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <Label>Loan Amount (₹) *</Label>
-                      <span className="text-sm font-bold text-emerald-700">
+                      <Label className="text-blue-700">Loan Amount (₹) *</Label>
+                      <span className="text-sm font-bold text-blue-700">
                         {formatCurrency(form.loanAmount)}
                       </span>
                     </div>
@@ -473,8 +546,8 @@ export function ApplicationForm() {
 
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <Label>Interest Rate (% p.a.)</Label>
-                      <span className="text-sm font-bold text-emerald-700">{form.interestRate}%</span>
+                      <Label className="text-blue-700">Interest Rate (% p.a.)</Label>
+                      <span className="text-sm font-bold text-blue-700">{form.interestRate}%</span>
                     </div>
                     <Slider
                       value={[form.interestRate]}
@@ -487,8 +560,8 @@ export function ApplicationForm() {
 
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <Label>Tenure (months)</Label>
-                      <span className="text-sm font-bold text-emerald-700">
+                      <Label className="text-blue-700">Tenure (months)</Label>
+                      <span className="text-sm font-bold text-blue-700">
                         {form.tenure} months ({Math.floor(form.tenure / 12)}y {form.tenure % 12}m)
                       </span>
                     </div>
@@ -501,10 +574,21 @@ export function ApplicationForm() {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="loanPurpose" className="text-blue-700">Loan Purpose</Label>
+                    <Input
+                      id="loanPurpose"
+                      value={form.loanPurpose}
+                      onChange={(e) => updateField('loanPurpose', e.target.value)}
+                      placeholder="किसलिए लोन चाहिए"
+                      className="h-11"
+                    />
+                  </div>
+
                   <Separator />
 
-                  <div className="p-4 bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-xl text-white text-center">
-                    <p className="text-sm text-emerald-200 mb-1">Your Monthly EMI</p>
+                  <div className="p-4 bg-gradient-to-r from-blue-700 to-blue-800 rounded-xl text-white text-center">
+                    <p className="text-sm text-blue-200 mb-1">Your Monthly EMI</p>
                     <p className="text-3xl font-black">{formatCurrency(emi)}</p>
                   </div>
                 </div>
@@ -513,10 +597,10 @@ export function ApplicationForm() {
               {/* Step 3: Employment Details */}
               {step === 2 && (
                 <div className="space-y-5">
-                  <h2 className="text-xl font-bold text-gray-900 mb-4">Employment Details</h2>
+                  <h2 className="text-xl font-bold text-gray-900 mb-4">Employment & Financial Details</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2 sm:col-span-2">
-                      <Label>Employment Type *</Label>
+                      <Label className="text-blue-700">Employment Type *</Label>
                       <Select value={form.employmentType} onValueChange={(v) => updateField('employmentType', v)}>
                         <SelectTrigger className="h-11">
                           <SelectValue placeholder="Select employment type" />
@@ -529,7 +613,7 @@ export function ApplicationForm() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="employer">Employer / Company Name</Label>
+                      <Label htmlFor="employer" className="text-blue-700">Employer / Company Name</Label>
                       <Input
                         id="employer"
                         value={form.employerName}
@@ -539,7 +623,7 @@ export function ApplicationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="income">Monthly Income (₹)</Label>
+                      <Label htmlFor="income" className="text-blue-700">Monthly Income (₹)</Label>
                       <Input
                         id="income"
                         type="number"
@@ -549,8 +633,8 @@ export function ApplicationForm() {
                         className="h-11"
                       />
                     </div>
-                    <div className="space-y-2 sm:col-span-2">
-                      <Label htmlFor="experience">Work Experience</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="experience" className="text-blue-700">Work Experience</Label>
                       <Input
                         id="experience"
                         value={form.workExperience}
@@ -559,6 +643,75 @@ export function ApplicationForm() {
                         className="h-11"
                       />
                     </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Existing Loan */}
+                  <div className="space-y-3">
+                    <Label className="text-blue-700 font-semibold">Do you have any existing loan?</Label>
+                    <div className="flex items-center gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="existingLoan"
+                          value="YES"
+                          checked={form.existingLoan === 'YES'}
+                          onChange={(e) => updateField('existingLoan', e.target.value)}
+                          className="accent-blue-700 w-4 h-4"
+                        />
+                        <span className="text-sm font-medium">Yes</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="existingLoan"
+                          value="NO"
+                          checked={form.existingLoan === 'NO'}
+                          onChange={(e) => updateField('existingLoan', e.target.value)}
+                          className="accent-blue-700 w-4 h-4"
+                        />
+                        <span className="text-sm font-medium">No</span>
+                      </label>
+                    </div>
+
+                    {form.existingLoan === 'YES' && (
+                      <div className="space-y-4 pl-2 border-l-2 border-blue-200">
+                        <div className="space-y-2">
+                          <Label htmlFor="existingLoanDetails" className="text-blue-700">Existing Loan Details</Label>
+                          <Textarea
+                            id="existingLoanDetails"
+                            value={form.existingLoanDetails}
+                            onChange={(e) => updateField('existingLoanDetails', e.target.value)}
+                            placeholder="Bank name, loan type, outstanding amount, etc."
+                            rows={2}
+                            className="resize-none"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="existingEmi" className="text-blue-700">Current EMI Amount (₹)</Label>
+                          <Input
+                            id="existingEmi"
+                            type="number"
+                            value={form.existingEmi}
+                            onChange={(e) => updateField('existingEmi', e.target.value)}
+                            placeholder="e.g., 5000"
+                            className="h-11"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="cibilScore" className="text-blue-700">Approx CIBIL Score (if known)</Label>
+                    <Input
+                      id="cibilScore"
+                      value={form.approxCibilScore}
+                      onChange={(e) => updateField('approxCibilScore', e.target.value)}
+                      placeholder="e.g., 750"
+                      className="h-11"
+                    />
                   </div>
                 </div>
               )}
@@ -569,7 +722,7 @@ export function ApplicationForm() {
                   <h2 className="text-xl font-bold text-gray-900 mb-4">Documents</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="aadhaar">Aadhaar Number *</Label>
+                      <Label htmlFor="aadhaar" className="text-blue-700">Aadhaar Number *</Label>
                       <Input
                         id="aadhaar"
                         value={form.aadhaarNumber}
@@ -580,7 +733,7 @@ export function ApplicationForm() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="pan">PAN Number *</Label>
+                      <Label htmlFor="pan" className="text-blue-700">PAN Number *</Label>
                       <Input
                         id="pan"
                         value={form.panNumber}
@@ -599,6 +752,7 @@ export function ApplicationForm() {
                       id="itr"
                       checked={form.itrFiled}
                       onCheckedChange={(checked) => updateField('itrFiled', !!checked)}
+                      className="data-[state=checked]:bg-blue-700 data-[state=checked]:border-blue-700"
                     />
                     <Label htmlFor="itr" className="cursor-pointer">
                       I have filed Income Tax Return (ITR)
@@ -607,9 +761,32 @@ export function ApplicationForm() {
 
                   <Separator />
 
+                  {/* Document Checklist */}
                   <div className="space-y-3">
-                    <Label>Upload Documents (Optional)</Label>
-                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-emerald-300 transition-colors">
+                    <Label className="text-blue-700 font-semibold">Document Checklist</Label>
+                    <p className="text-xs text-gray-500">Select the documents you have ready</p>
+                    <div className="space-y-2">
+                      {DOC_CHECKLIST_ITEMS.map((item) => (
+                        <div key={item.key} className="flex items-center gap-2">
+                          <Checkbox
+                            id={`doc-${item.key}`}
+                            checked={!!form.docChecklist[item.key]}
+                            onCheckedChange={() => toggleDocChecklist(item.key)}
+                            className="data-[state=checked]:bg-blue-700 data-[state=checked]:border-blue-700"
+                          />
+                          <Label htmlFor={`doc-${item.key}`} className="cursor-pointer text-sm">
+                            {item.label}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-3">
+                    <Label className="text-blue-700">Upload Documents (Optional)</Label>
+                    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-blue-300 transition-colors">
                       <input
                         type="file"
                         multiple
@@ -640,7 +817,7 @@ export function ApplicationForm() {
                             className="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
                           >
                             <div className="flex items-center gap-2 text-sm">
-                              <FileText className="h-4 w-4 text-emerald-600" />
+                              <FileText className="h-4 w-4 text-blue-600" />
                               {doc}
                             </div>
                             <button
@@ -657,7 +834,7 @@ export function ApplicationForm() {
                 </div>
               )}
 
-              {/* Step 5: Review */}
+              {/* Step 5: Review & Submit */}
               {step === 4 && (
                 <div className="space-y-6">
                   <h2 className="text-xl font-bold text-gray-900 mb-4">
@@ -671,12 +848,20 @@ export function ApplicationForm() {
                     </h3>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div><span className="text-gray-400">Name:</span> <strong>{form.fullName}</strong></div>
+                      <div><span className="text-gray-400">Father&apos;s Name:</span> <strong>{form.fatherName || 'N/A'}</strong></div>
                       <div><span className="text-gray-400">Email:</span> <strong>{form.email}</strong></div>
                       <div><span className="text-gray-400">Phone:</span> <strong>{form.phone}</strong></div>
+                      <div><span className="text-gray-400">Alternate Phone:</span> <strong>{form.alternatePhone || 'N/A'}</strong></div>
                       <div><span className="text-gray-400">DOB:</span> <strong>{form.dateOfBirth || 'N/A'}</strong></div>
                       <div><span className="text-gray-400">Gender:</span> <strong>{form.gender || 'N/A'}</strong></div>
                       <div><span className="text-gray-400">City:</span> <strong>{form.city}</strong></div>
                     </div>
+                    {form.permanentAddress && (
+                      <p className="text-sm mt-2">
+                        <span className="text-gray-400">Permanent Address:</span>{' '}
+                        <strong>{form.permanentAddress}</strong>
+                      </p>
+                    )}
                   </div>
 
                   <Separator />
@@ -688,10 +873,13 @@ export function ApplicationForm() {
                     </h3>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div><span className="text-gray-400">Type:</span> <strong>{LOAN_TYPES.find(l => l.value === form.loanType)?.label}</strong></div>
-                      <div><span className="text-gray-400">Amount:</span> <strong className="text-emerald-700">{formatCurrency(form.loanAmount)}</strong></div>
+                      <div><span className="text-gray-400">Amount:</span> <strong className="text-blue-700">{formatCurrency(form.loanAmount)}</strong></div>
                       <div><span className="text-gray-400">Rate:</span> <strong>{form.interestRate}%</strong></div>
                       <div><span className="text-gray-400">Tenure:</span> <strong>{form.tenure} months</strong></div>
-                      <div className="col-span-2"><span className="text-gray-400">Monthly EMI:</span> <strong className="text-emerald-700 text-base">{formatCurrency(emi)}</strong></div>
+                      <div className="col-span-2"><span className="text-gray-400">Monthly EMI:</span> <strong className="text-blue-700 text-base">{formatCurrency(emi)}</strong></div>
+                      {form.loanPurpose && (
+                        <div className="col-span-2"><span className="text-gray-400">Loan Purpose:</span> <strong>{form.loanPurpose}</strong></div>
+                      )}
                     </div>
                   </div>
 
@@ -707,6 +895,18 @@ export function ApplicationForm() {
                       <div><span className="text-gray-400">Employer:</span> <strong>{form.employerName || 'N/A'}</strong></div>
                       <div><span className="text-gray-400">Income:</span> <strong>{form.monthlyIncome ? formatCurrency(Number(form.monthlyIncome)) : 'N/A'}</strong></div>
                       <div><span className="text-gray-400">Experience:</span> <strong>{form.workExperience || 'N/A'}</strong></div>
+                      <div><span className="text-gray-400">Existing Loan:</span> <strong>{form.existingLoan || 'N/A'}</strong></div>
+                      {form.existingLoan === 'YES' && (
+                        <>
+                          <div><span className="text-gray-400">Existing EMI:</span> <strong>{form.existingEmi ? `₹${form.existingEmi}` : 'N/A'}</strong></div>
+                          {form.existingLoanDetails && (
+                            <div className="col-span-2"><span className="text-gray-400">Loan Details:</span> <strong>{form.existingLoanDetails}</strong></div>
+                          )}
+                        </>
+                      )}
+                      {form.approxCibilScore && (
+                        <div><span className="text-gray-400">CIBIL Score:</span> <strong>{form.approxCibilScore}</strong></div>
+                      )}
                     </div>
                   </div>
 
@@ -723,39 +923,82 @@ export function ApplicationForm() {
                       <div><span className="text-gray-400">ITR Filed:</span> <strong>{form.itrFiled ? 'Yes' : 'No'}</strong></div>
                       <div><span className="text-gray-400">Docs:</span> <strong>{form.documents.length} file(s)</strong></div>
                     </div>
+                    <div className="mt-2 text-sm">
+                      <span className="text-gray-400">Doc Checklist: </span>
+                      {DOC_CHECKLIST_ITEMS.filter(d => form.docChecklist[d.key]).length > 0
+                        ? DOC_CHECKLIST_ITEMS.filter(d => form.docChecklist[d.key]).map(d => (
+                            <span key={d.key} className="inline-flex items-center gap-1 mr-3">
+                              <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" />
+                              <strong>{d.label}</strong>
+                            </span>
+                          ))
+                        : <span className="text-gray-400 font-medium">None selected</span>
+                      }
+                    </div>
                   </div>
 
                   <Separator />
 
-                  {/* Processing Fee */}
-                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5 text-amber-600" />
-                        <div>
-                          <p className="font-semibold text-gray-900">Processing Fee</p>
-                          <p className="text-xs text-gray-500">One-time non-refundable fee</p>
-                        </div>
+                  {/* Service Fee Box */}
+                  <div className="p-4 rounded-xl border-2 border-red-200 bg-red-50">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5">
+                        <AlertTriangle className="h-5 w-5 text-red-600" />
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-gray-900">₹499</p>
-                        {!feePaid && (
-                          <Button
-                            size="sm"
-                            onClick={handlePayFee}
-                            className="bg-amber-500 hover:bg-amber-600 text-white mt-1"
-                          >
-                            Pay Now
-                          </Button>
-                        )}
-                        {feePaid && (
-                          <span className="text-xs text-emerald-600 font-medium">
-                            ✅ Paid
-                          </span>
-                        )}
+                      <div className="flex-1">
+                        <p className="font-bold text-red-800 text-base">Service Fee - ₹499</p>
+                        <p className="text-sm text-red-700 mt-1">
+                          This is a one-time service fee for processing your loan application. This fee is <strong>NON-REFUNDABLE</strong> under any circumstances.
+                        </p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <Checkbox
+                            id="service-fee"
+                            checked={form.serviceFeeAccepted}
+                            onCheckedChange={(checked) => updateField('serviceFeeAccepted', !!checked)}
+                            className="data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
+                          />
+                          <Label htmlFor="service-fee" className="cursor-pointer text-sm text-red-800 font-medium">
+                            I agree to pay the non-refundable service fee of ₹499 and understand that this amount will not be refunded.
+                          </Label>
+                        </div>
                       </div>
                     </div>
                   </div>
+
+                  {/* Declaration Box */}
+                  <div className="p-4 rounded-xl border-2 border-amber-200 bg-amber-50">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5">
+                        <ShieldCheck className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-bold text-amber-800 text-base">Declaration / घोषणा</p>
+                        <p className="text-sm text-amber-700 mt-1">
+                          मैं घोषणा करता/करती हूँ कि ऊपर दी गई सभी जानकारी सही है। गलत जानकारी देने पर मेरी एप्लीकेशन रद्द की जा सकती है।
+                        </p>
+                        <p className="text-sm text-amber-700 mt-1 italic">
+                          I declare that all the information provided above is true and correct. The application may be rejected if any information is found false.
+                        </p>
+                        <div className="flex items-center gap-2 mt-3">
+                          <Checkbox
+                            id="declaration"
+                            checked={form.declarationAccepted}
+                            onCheckedChange={(checked) => updateField('declarationAccepted', !!checked)}
+                            className="data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+                          />
+                          <Label htmlFor="declaration" className="cursor-pointer text-sm text-amber-800 font-medium">
+                            I accept the above declaration / मैं उपरोक्त घोषणा स्वीकार करता/करती हूँ
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {!canSubmit && (
+                    <p className="text-sm text-center text-gray-400">
+                      Please accept both the declaration and service fee to enable submission.
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -774,7 +1017,7 @@ export function ApplicationForm() {
                 {step < STEPS.length - 1 ? (
                   <Button
                     onClick={handleNext}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="bg-blue-700 hover:bg-blue-800 text-white"
                   >
                     Next
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -782,8 +1025,8 @@ export function ApplicationForm() {
                 ) : (
                   <Button
                     onClick={handleSubmit}
-                    disabled={loading || !feePaid}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    disabled={loading || !canSubmit}
+                    className="bg-blue-700 hover:bg-blue-800 text-white"
                   >
                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {loading ? 'Submitting...' : 'Submit Application'}

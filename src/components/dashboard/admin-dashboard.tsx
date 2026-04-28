@@ -20,6 +20,7 @@ import {
   Briefcase,
   MapPin,
   CreditCard,
+  ShieldCheck,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -88,6 +89,20 @@ interface Application {
   rejectionReason: string | null
   createdAt: string
   updatedAt: string
+  // New fields
+  fatherName: string | null
+  alternatePhone: string | null
+  permanentAddress: string | null
+  loanPurpose: string | null
+  existingLoan: string | null
+  existingLoanDetails: string | null
+  existingEmi: string | null
+  approxCibilScore: string | null
+  bankStatement: boolean
+  salarySlip: boolean
+  passportPhoto: boolean
+  declarationAccepted: boolean
+  documentsUploaded: string | null
   user?: {
     id: string
     name: string
@@ -110,8 +125,8 @@ function formatDate(dateStr: string): string {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { bg: string; text: string; label: string }> = {
     PENDING: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Pending' },
-    UNDER_REVIEW: { bg: 'bg-sky-100', text: 'text-sky-700', label: 'Under Review' },
-    APPROVED: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Approved' },
+    UNDER_REVIEW: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Under Review' },
+    APPROVED: { bg: 'bg-green-100', text: 'text-green-700', label: 'Approved' },
     REJECTED: { bg: 'bg-red-100', text: 'text-red-700', label: 'Rejected' },
   }
   const v = map[status] || { bg: 'bg-gray-100', text: 'text-gray-700', label: status }
@@ -278,7 +293,7 @@ export function AdminDashboard() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              👨‍💼 Admin Dashboard
+              Admin Dashboard
             </h1>
             <p className="text-gray-500 mt-1">
               Manage all loan applications from one place
@@ -309,8 +324,8 @@ export function AdminDashboard() {
           {[
             { label: 'Total', value: statusCounts.total, icon: FileText, color: 'bg-gray-100 text-gray-700' },
             { label: 'Pending', value: statusCounts.PENDING, icon: Clock, color: 'bg-amber-100 text-amber-700' },
-            { label: 'Under Review', value: statusCounts.UNDER_REVIEW, icon: Search, color: 'bg-sky-100 text-sky-700' },
-            { label: 'Approved', value: statusCounts.APPROVED, icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700' },
+            { label: 'Under Review', value: statusCounts.UNDER_REVIEW, icon: Search, color: 'bg-blue-100 text-blue-700' },
+            { label: 'Approved', value: statusCounts.APPROVED, icon: CheckCircle2, color: 'bg-green-100 text-green-700' },
             { label: 'Rejected', value: statusCounts.REJECTED, icon: XCircle, color: 'bg-red-100 text-red-700' },
           ].map((stat) => {
             const Icon = stat.icon
@@ -364,7 +379,7 @@ export function AdminDashboard() {
           <CardContent className="p-0">
             {loading ? (
               <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                 <span className="ml-2 text-gray-500">Loading applications...</span>
               </div>
             ) : applications.length === 0 ? (
@@ -393,7 +408,7 @@ export function AdminDashboard() {
                     <TableBody>
                       {applications.map((app) => (
                         <TableRow key={app.id} className="hover:bg-gray-50/50">
-                          <TableCell className="font-medium text-emerald-700 text-sm">
+                          <TableCell className="font-medium text-blue-700 text-sm">
                             {app.applicationId}
                           </TableCell>
                           <TableCell>
@@ -424,8 +439,8 @@ export function AdminDashboard() {
                                   <Eye className="h-4 w-4 mr-2" /> View Details
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setApproveApp(app)}>
-                                  <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-600" />
-                                  <span className="text-emerald-600">Approve</span>
+                                  <CheckCircle2 className="h-4 w-4 mr-2 text-blue-600" />
+                                  <span className="text-blue-600">Approve</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => { setRejectApp(app); setRejectReason('') }}>
                                   <XCircle className="h-4 w-4 mr-2 text-red-500" />
@@ -505,15 +520,23 @@ export function AdminDashboard() {
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><span className="text-gray-400">Full Name:</span> <strong>{viewApp.fullName}</strong></div>
+                  <div><span className="text-gray-400">Father&apos;s Name:</span> <strong>{viewApp.fatherName || 'N/A'}</strong></div>
                   <div><span className="text-gray-400">Email:</span> <strong>{viewApp.email}</strong></div>
                   <div><span className="text-gray-400">Phone:</span> <strong>{viewApp.phone}</strong></div>
+                  <div><span className="text-gray-400">Alternate Phone:</span> <strong>{viewApp.alternatePhone || 'N/A'}</strong></div>
                   <div><span className="text-gray-400">DOB:</span> <strong>{viewApp.dateOfBirth || 'N/A'}</strong></div>
                   <div><span className="text-gray-400">Gender:</span> <strong>{viewApp.gender || 'N/A'}</strong></div>
                 </div>
                 {viewApp.address && (
                   <p className="text-sm mt-2">
-                    <span className="text-gray-400">Address:</span>{' '}
+                    <span className="text-gray-400">Current Address:</span>{' '}
                     <strong>{viewApp.address}, {viewApp.city}, {viewApp.state} - {viewApp.pincode}</strong>
+                  </p>
+                )}
+                {viewApp.permanentAddress && (
+                  <p className="text-sm mt-1">
+                    <span className="text-gray-400">Permanent Address:</span>{' '}
+                    <strong>{viewApp.permanentAddress}</strong>
                   </p>
                 )}
               </div>
@@ -527,11 +550,13 @@ export function AdminDashboard() {
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><span className="text-gray-400">Loan Type:</span> <strong>{viewApp.loanType}</strong></div>
-                  <div><span className="text-gray-400">Amount:</span> <strong className="text-emerald-700">{formatCurrency(viewApp.loanAmount)}</strong></div>
+                  <div><span className="text-gray-400">Amount:</span> <strong className="text-blue-700">{formatCurrency(viewApp.loanAmount)}</strong></div>
                   <div><span className="text-gray-400">Interest Rate:</span> <strong>{viewApp.interestRate}%</strong></div>
                   <div><span className="text-gray-400">Tenure:</span> <strong>{viewApp.tenure} months</strong></div>
-                  <div><span className="text-gray-400">Monthly EMI:</span> <strong className="text-emerald-700">{viewApp.monthlyEmi ? formatCurrency(viewApp.monthlyEmi) : 'N/A'}</strong></div>
-                  <div><span className="text-gray-400">Fee Paid:</span> <strong>{viewApp.processingFeePaid ? '✅ Yes' : '❌ No'}</strong></div>
+                  <div><span className="text-gray-400">Monthly EMI:</span> <strong className="text-blue-700">{viewApp.monthlyEmi ? formatCurrency(viewApp.monthlyEmi) : 'N/A'}</strong></div>
+                  <div><span className="text-gray-400">Loan Purpose:</span> <strong>{viewApp.loanPurpose || 'N/A'}</strong></div>
+                  <div><span className="text-gray-400">CIBIL Score:</span> <strong>{viewApp.approxCibilScore || 'N/A'}</strong></div>
+                  <div><span className="text-gray-400">Fee Paid:</span> <strong>{viewApp.processingFeePaid ? 'Yes' : 'No'}</strong></div>
                 </div>
               </div>
 
@@ -540,13 +565,22 @@ export function AdminDashboard() {
               {/* Employment */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3 flex items-center gap-1.5">
-                  <Briefcase className="h-4 w-4" /> Employment Details
+                  <Briefcase className="h-4 w-4" /> Employment & Financial Details
                 </h3>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div><span className="text-gray-400">Type:</span> <strong>{viewApp.employmentType || 'N/A'}</strong></div>
                   <div><span className="text-gray-400">Employer:</span> <strong>{viewApp.employerName || 'N/A'}</strong></div>
                   <div><span className="text-gray-400">Income:</span> <strong>{viewApp.monthlyIncome ? formatCurrency(viewApp.monthlyIncome) : 'N/A'}</strong></div>
                   <div><span className="text-gray-400">Experience:</span> <strong>{viewApp.workExperience || 'N/A'}</strong></div>
+                  <div><span className="text-gray-400">Existing Loan:</span> <strong>{viewApp.existingLoan || 'N/A'}</strong></div>
+                  {viewApp.existingLoan === 'YES' && (
+                    <>
+                      <div><span className="text-gray-400">Existing EMI:</span> <strong>{viewApp.existingEmi ? `₹${viewApp.existingEmi}` : 'N/A'}</strong></div>
+                      {viewApp.existingLoanDetails && (
+                        <div className="col-span-2"><span className="text-gray-400">Loan Details:</span> <strong>{viewApp.existingLoanDetails}</strong></div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -561,6 +595,29 @@ export function AdminDashboard() {
                   <div><span className="text-gray-400">Aadhaar:</span> <strong>{viewApp.aadhaarNumber || 'N/A'}</strong></div>
                   <div><span className="text-gray-400">PAN:</span> <strong>{viewApp.panNumber || 'N/A'}</strong></div>
                   <div><span className="text-gray-400">ITR Filed:</span> <strong>{viewApp.itrFiled ? 'Yes' : 'No'}</strong></div>
+                </div>
+                <div className="mt-3 text-sm">
+                  <span className="text-gray-400 font-medium">Document Checklist: </span>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                    <span><strong>Bank Statement:</strong> {viewApp.bankStatement ? 'Yes' : 'No'}</span>
+                    <span><strong>Salary Slip:</strong> {viewApp.salarySlip ? 'Yes' : 'No'}</span>
+                    <span><strong>Passport Photo:</strong> {viewApp.passportPhoto ? 'Yes' : 'No'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Declaration */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3 flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4" /> Declaration
+                </h3>
+                <div className="text-sm">
+                  <span className="text-gray-400">Declaration Accepted:</span>{' '}
+                  <strong className={viewApp.declarationAccepted ? 'text-green-700' : 'text-red-600'}>
+                    {viewApp.declarationAccepted ? 'Yes' : 'No'}
+                  </strong>
                 </div>
               </div>
 
@@ -583,12 +640,12 @@ export function AdminDashboard() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              <CheckCircle2 className="h-5 w-5 text-blue-600" />
               Approve Application
             </DialogTitle>
             <DialogDescription>
               Are you sure you want to approve application{' '}
-              <strong className="text-emerald-700">{approveApp?.applicationId}</strong> for{' '}
+              <strong className="text-blue-700">{approveApp?.applicationId}</strong> for{' '}
               <strong>{approveApp?.fullName}</strong>?
             </DialogDescription>
           </DialogHeader>
@@ -599,7 +656,7 @@ export function AdminDashboard() {
             <Button
               onClick={handleApprove}
               disabled={actionLoading}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="bg-blue-700 hover:bg-blue-800 text-white"
             >
               {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Approve

@@ -9,24 +9,37 @@ export function Hero() {
   const { navigate } = useAppStore()
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-600 to-emerald-500">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-white rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-amber-400 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white rounded-full blur-3xl" />
+    <section className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
+      {/* Geometric Pattern Overlay */}
+      <div className="absolute inset-0 opacity-[0.04]" style={{
+        backgroundImage: `
+          linear-gradient(30deg, rgba(255,255,255,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.1) 87.5%),
+          linear-gradient(150deg, rgba(255,255,255,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.1) 87.5%),
+          linear-gradient(30deg, rgba(255,255,255,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.1) 87.5%),
+          linear-gradient(150deg, rgba(255,255,255,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.1) 87.5%)
+        `,
+        backgroundSize: '80px 140px',
+        backgroundPosition: '0 0, 0 0, 40px 70px, 40px 70px'
+      }} />
+
+      {/* Golden Light Orbs */}
+      <div className="absolute inset-0">
+        <div className="absolute top-10 left-[15%] w-72 h-72 bg-amber-500/15 rounded-full blur-[100px]" />
+        <div className="absolute bottom-20 right-[10%] w-96 h-96 bg-amber-400/10 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px]" />
       </div>
 
       <div className="relative container mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Hindi Badge */}
+          {/* Red Accent Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium text-emerald-100 bg-white/15 rounded-full backdrop-blur-sm">
-              देहरादून, उत्तराखंड से | Trusted Since 2020
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 text-sm font-bold tracking-wide text-white bg-red-600/90 rounded-full backdrop-blur-sm border border-red-500/50 shadow-lg shadow-red-900/30">
+              <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse" />
+              MG FINANCIAL SERVICES | देहरादून
             </span>
           </motion.div>
 
@@ -35,17 +48,25 @@ export function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight mb-4"
+            className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight mb-2"
           >
             लोन | लोन | लोन
           </motion.h1>
+
+          {/* Gold underline */}
+          <motion.div
+            initial={{ opacity: 0, scaleX: 0 }}
+            animate={{ opacity: 1, scaleX: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="w-24 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent mx-auto mb-6 rounded-full"
+          />
 
           {/* Hindi Subheadline */}
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg sm:text-xl md:text-2xl text-emerald-50 font-medium mb-3"
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="text-lg sm:text-xl md:text-2xl text-blue-100 font-medium mb-3"
           >
             सिबिल स्कोर (CIBIL Score) कम हो या खराब, चिंता छोड़ें...
             <br className="hidden sm:block" />
@@ -56,12 +77,12 @@ export function Hero() {
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-base sm:text-lg text-emerald-100/80 mb-8 max-w-2xl mx-auto"
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="text-base sm:text-lg text-blue-200/70 mb-8 max-w-2xl mx-auto"
           >
             Low CIBIL Score? Bad Credit? Don&apos;t Worry — Everyone Gets a Loan!
             <br />
-            <span className="text-sm text-emerald-200/60">
+            <span className="text-sm text-amber-300/50">
               Quick Processing • Lowest Interest Rates • Minimal Documentation
             </span>
           </motion.p>
@@ -70,13 +91,13 @@ export function Hero() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.6, delay: 0.45 }}
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <Button
               size="lg"
               onClick={() => navigate('apply')}
-              className="bg-white text-emerald-700 hover:bg-emerald-50 font-bold text-lg px-8 py-6 h-auto rounded-xl shadow-lg hover:shadow-xl transition-all"
+              className="bg-white text-blue-900 hover:bg-blue-50 font-bold text-lg px-8 py-6 h-auto rounded-2xl shadow-xl hover:shadow-2xl transition-all border border-white/50"
             >
               Apply Now
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -85,7 +106,7 @@ export function Hero() {
               size="lg"
               variant="outline"
               onClick={() => navigate('emi-calculator')}
-              className="border-2 border-white/40 text-white hover:bg-white/15 font-bold text-lg px-8 py-6 h-auto rounded-xl backdrop-blur-sm transition-all"
+              className="border-2 border-amber-500/60 text-white hover:bg-amber-500/15 font-bold text-lg px-8 py-6 h-auto rounded-2xl backdrop-blur-sm transition-all bg-transparent"
             >
               <Calculator className="mr-2 h-5 w-5" />
               Calculate EMI
@@ -96,7 +117,7 @@ export function Hero() {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.55 }}
             className="mt-12 grid grid-cols-3 gap-4 sm:gap-8 max-w-lg mx-auto"
           >
             {[
@@ -105,8 +126,8 @@ export function Hero() {
               { value: '24hrs', label: 'Avg. Processing' },
             ].map((stat) => (
               <div key={stat.label} className="text-center">
-                <p className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs sm:text-sm text-emerald-200/70 mt-1">{stat.label}</p>
+                <p className="text-2xl sm:text-3xl font-black text-white">{stat.value}</p>
+                <p className="text-xs sm:text-sm text-amber-400/70 mt-1 font-medium">{stat.label}</p>
               </div>
             ))}
           </motion.div>

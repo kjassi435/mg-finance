@@ -17,193 +17,207 @@ export function Header() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <button
-          onClick={() => navigate('landing')}
-          className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-        >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-600 text-white">
-            <IndianRupee className="h-5 w-5" />
-          </div>
-          <span className="text-xl font-bold text-emerald-700">MG Finance</span>
-        </button>
+    <header className="sticky top-0 z-50 w-full">
+      {/* Gold accent line */}
+      <div className="h-[2px] bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
 
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6">
-          {user && currentPage === 'landing' && (
-            <>
-              {navItems.map((item) => (
-                <button
-                  key={item.page}
-                  onClick={() => navigate(item.page)}
-                  className="text-sm font-medium text-gray-600 hover:text-emerald-600 transition-colors"
-                >
-                  {item.label}
-                </button>
-              ))}
-            </>
-          )}
-        </nav>
-
-        {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-3">
-          <a
-            href="tel:+919876543210"
-            className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-emerald-600 transition-colors"
+      {/* Main header */}
+      <div className="bg-white/95 backdrop-blur-md shadow-lg shadow-slate-900/5 supports-[backdrop-filter]:bg-white/80">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          {/* Logo */}
+          <button
+            onClick={() => navigate('landing')}
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity group"
           >
-            <Phone className="h-4 w-4" />
-            <span className="font-medium">+91 98765 43210</span>
-          </a>
-          <Separator orientation="vertical" className="h-6" />
-          {user ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-500">
-                {user.role === 'ADMIN' ? '👨‍💼 Admin' : `👋 ${user.name}`}
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-700 text-white shadow-md shadow-blue-700/20">
+              <IndianRupee className="h-5 w-5" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-slate-900 leading-tight">
+                MG Finance
               </span>
-              {user.role === 'ADMIN' ? (
-                <Button
-                  onClick={() => navigate('admin')}
-                  variant="outline"
-                  size="sm"
-                  className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                >
-                  Dashboard
-                </Button>
-              ) : (
-                <Button
-                  onClick={() => navigate('dashboard')}
-                  variant="outline"
-                  size="sm"
-                  className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                >
-                  My Dashboard
-                </Button>
-              )}
-              <Button
-                onClick={logout}
-                variant="ghost"
-                size="sm"
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <span className="h-[2px] w-0 group-hover:w-full bg-amber-500 transition-all duration-300 rounded-full" />
             </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => navigate('login')}
-                variant="outline"
-                size="sm"
-                className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-              >
-                Login
-              </Button>
-              <Button
-                onClick={() => navigate('signup')}
-                size="sm"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              >
-                Sign Up
-              </Button>
-            </div>
-          )}
-        </div>
+          </button>
 
-        {/* Mobile Menu */}
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-72">
-            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-            <div className="flex flex-col gap-4 pt-6">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white">
-                  <IndianRupee className="h-4 w-4" />
-                </div>
-                <span className="font-bold text-emerald-700">MG Finance</span>
-              </div>
-              <Separator />
-              <nav className="flex flex-col gap-2">
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-6">
+            {user && currentPage === 'landing' && (
+              <>
                 {navItems.map((item) => (
-                  <Button
+                  <button
                     key={item.page}
-                    variant="ghost"
-                    className="justify-start text-gray-600 hover:text-emerald-600 hover:bg-emerald-50"
-                    onClick={() => {
-                      navigate(item.page)
-                      setOpen(false)
-                    }}
+                    onClick={() => navigate(item.page)}
+                    className="text-sm font-medium text-slate-600 hover:text-blue-700 transition-colors"
                   >
                     {item.label}
-                  </Button>
+                  </button>
                 ))}
-              </nav>
-              <Separator />
-              <a
-                href="tel:+919876543210"
-                className="flex items-center gap-2 text-sm text-gray-600 px-3 py-2"
-              >
-                <Phone className="h-4 w-4" />
-                +91 98765 43210
-              </a>
-              <Separator />
-              {user ? (
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm text-gray-500 px-3">
-                    👋 {user.name} ({user.role})
-                  </p>
+              </>
+            )}
+          </nav>
+
+          {/* Desktop Actions */}
+          <div className="hidden md:flex items-center gap-3">
+            <a
+              href="tel:+919876543210"
+              className="flex items-center gap-1.5 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors"
+            >
+              <Phone className="h-4 w-4" />
+              <span>+91 98765 43210</span>
+            </a>
+            <Separator orientation="vertical" className="h-6 bg-slate-200" />
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-500">
+                  {user.role === 'ADMIN' ? '👨‍💼 Admin' : `👋 ${user.name}`}
+                </span>
+                {user.role === 'ADMIN' ? (
                   <Button
-                    onClick={() => {
-                      navigate(user.role === 'ADMIN' ? 'admin' : 'dashboard')
-                      setOpen(false)
-                    }}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white justify-start"
-                  >
-                    {user.role === 'ADMIN' ? 'Admin Dashboard' : 'My Dashboard'}
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      logout()
-                      setOpen(false)
-                    }}
+                    onClick={() => navigate('admin')}
                     variant="outline"
-                    className="border-red-200 text-red-600 hover:bg-red-50 justify-start"
+                    size="sm"
+                    className="border-blue-200 text-blue-700 hover:bg-blue-50 bg-white"
                   >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
+                    Dashboard
                   </Button>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2">
+                ) : (
                   <Button
-                    onClick={() => {
-                      navigate('login')
-                      setOpen(false)
-                    }}
+                    onClick={() => navigate('dashboard')}
                     variant="outline"
-                    className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                    size="sm"
+                    className="border-blue-200 text-blue-700 hover:bg-blue-50 bg-white"
                   >
-                    Login
+                    My Dashboard
                   </Button>
-                  <Button
-                    onClick={() => {
-                      navigate('signup')
-                      setOpen(false)
-                    }}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
-                  >
-                    Sign Up
-                  </Button>
+                )}
+                <Button
+                  onClick={logout}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => navigate('login')}
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-200 text-blue-700 hover:bg-blue-50 bg-white"
+                >
+                  Login
+                </Button>
+                <Button
+                  onClick={() => navigate('signup')}
+                  size="sm"
+                  className="bg-blue-700 hover:bg-blue-800 text-white shadow-md shadow-blue-700/20"
+                >
+                  Sign Up
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Menu */}
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon" className="text-slate-700">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72 bg-blue-950 border-blue-900">
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <div className="flex flex-col gap-4 pt-6">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-700 text-white">
+                    <IndianRupee className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-white">MG Finance</span>
+                    <div className="h-[1.5px] w-12 bg-amber-500 rounded-full mt-0.5" />
+                  </div>
                 </div>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+                <Separator className="bg-blue-800" />
+                <nav className="flex flex-col gap-2">
+                  {navItems.map((item) => (
+                    <Button
+                      key={item.page}
+                      variant="ghost"
+                      className="justify-start text-blue-100 hover:text-white hover:bg-blue-900/50"
+                      onClick={() => {
+                        navigate(item.page)
+                        setOpen(false)
+                      }}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </nav>
+                <Separator className="bg-blue-800" />
+                <a
+                  href="tel:+919876543210"
+                  className="flex items-center gap-2 text-sm text-amber-400 px-3 py-2 font-medium"
+                >
+                  <Phone className="h-4 w-4" />
+                  +91 98765 43210
+                </a>
+                <Separator className="bg-blue-800" />
+                {user ? (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-blue-200 px-3">
+                      👋 {user.name} ({user.role})
+                    </p>
+                    <Button
+                      onClick={() => {
+                        navigate(user.role === 'ADMIN' ? 'admin' : 'dashboard')
+                        setOpen(false)
+                      }}
+                      className="bg-blue-700 hover:bg-blue-800 text-white justify-start"
+                    >
+                      {user.role === 'ADMIN' ? 'Admin Dashboard' : 'My Dashboard'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        logout()
+                        setOpen(false)
+                      }}
+                      variant="outline"
+                      className="border-red-500/30 text-red-400 hover:bg-red-950/30 justify-start"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      onClick={() => {
+                        navigate('login')
+                        setOpen(false)
+                      }}
+                      variant="outline"
+                      className="border-blue-700 text-blue-300 hover:bg-blue-900/50"
+                    >
+                      Login
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        navigate('signup')
+                        setOpen(false)
+                      }}
+                      className="bg-blue-700 hover:bg-blue-800 text-white"
+                    >
+                      Sign Up
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   )

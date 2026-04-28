@@ -84,6 +84,18 @@ export async function POST(request: NextRequest) {
       aadhaarNumber,
       panNumber,
       itrFiled,
+      fatherName,
+      alternatePhone,
+      permanentAddress,
+      loanPurpose,
+      existingLoan,
+      existingLoanDetails,
+      existingEmi,
+      approxCibilScore,
+      bankStatement,
+      salarySlip,
+      passportPhoto,
+      declarationAccepted,
     } = body;
 
     // Validate required fields
@@ -142,6 +154,18 @@ export async function POST(request: NextRequest) {
         aadhaarNumber: aadhaarNumber || null,
         panNumber: panNumber || null,
         itrFiled: itrFiled || false,
+        fatherName: fatherName || null,
+        alternatePhone: alternatePhone || null,
+        permanentAddress: permanentAddress || null,
+        loanPurpose: loanPurpose || null,
+        existingLoan: existingLoan || null,
+        existingLoanDetails: existingLoanDetails || null,
+        existingEmi: existingEmi || null,
+        approxCibilScore: approxCibilScore || null,
+        bankStatement: bankStatement || false,
+        salarySlip: salarySlip || false,
+        passportPhoto: passportPhoto || false,
+        declarationAccepted: declarationAccepted || false,
       },
     });
 

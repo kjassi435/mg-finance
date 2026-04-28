@@ -16,7 +16,6 @@ import {
   User,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
@@ -67,8 +66,8 @@ function formatDate(dateStr: string): string {
 function StatusBadge({ status }: { status: string }) {
   const variants: Record<string, { bg: string; text: string; label: string }> = {
     PENDING: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Pending' },
-    UNDER_REVIEW: { bg: 'bg-sky-100', text: 'text-sky-700', label: 'Under Review' },
-    APPROVED: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Approved' },
+    UNDER_REVIEW: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Under Review' },
+    APPROVED: { bg: 'bg-green-100', text: 'text-green-700', label: 'Approved' },
     REJECTED: { bg: 'bg-red-100', text: 'text-red-700', label: 'Rejected' },
   }
   const v = variants[status] || { bg: 'bg-gray-100', text: 'text-gray-700', label: status }
@@ -124,7 +123,7 @@ export function UserDashboard() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Welcome back, {user?.name} 👋
+              Welcome back, {user?.name}
             </h1>
             <p className="text-gray-500 mt-1">
               Track your loan applications and manage your account
@@ -132,7 +131,7 @@ export function UserDashboard() {
           </div>
           <Button
             onClick={() => navigate('apply')}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="bg-blue-700 hover:bg-blue-800 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             Apply for New Loan
@@ -144,7 +143,7 @@ export function UserDashboard() {
           {[
             { label: 'Total Applications', value: stats.total, icon: FileText, color: 'bg-gray-100 text-gray-700' },
             { label: 'Pending', value: stats.pending, icon: Clock, color: 'bg-amber-100 text-amber-700' },
-            { label: 'Approved', value: stats.approved, icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700' },
+            { label: 'Approved', value: stats.approved, icon: CheckCircle2, color: 'bg-green-100 text-green-700' },
             { label: 'Rejected', value: stats.rejected, icon: XCircle, color: 'bg-red-100 text-red-700' },
           ].map((stat) => {
             const Icon = stat.icon
@@ -172,7 +171,7 @@ export function UserDashboard() {
           <CardContent>
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                 <span className="ml-2 text-gray-500">Loading applications...</span>
               </div>
             ) : applications.length === 0 ? (
@@ -188,7 +187,7 @@ export function UserDashboard() {
                 </p>
                 <Button
                   onClick={() => navigate('apply')}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                  className="bg-blue-700 hover:bg-blue-800 text-white"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Apply Now
@@ -199,7 +198,7 @@ export function UserDashboard() {
                 {applications.map((app) => (
                   <div
                     key={app.id}
-                    className="border border-gray-100 rounded-xl overflow-hidden hover:border-emerald-200 transition-colors"
+                    className="border border-gray-100 rounded-xl overflow-hidden hover:border-blue-200 transition-colors"
                   >
                     {/* Summary Row */}
                     <button
@@ -208,7 +207,7 @@ export function UserDashboard() {
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         <div>
-                          <p className="font-bold text-emerald-700 text-sm">{app.applicationId}</p>
+                          <p className="font-bold text-blue-700 text-sm">{app.applicationId}</p>
                           <p className="text-xs text-gray-400">{formatDate(app.createdAt)}</p>
                         </div>
                         <div className="hidden sm:block h-8 w-px bg-gray-200" />
@@ -251,7 +250,7 @@ export function UserDashboard() {
                             <p>Employment: <strong>{app.employmentType || 'N/A'}</strong></p>
                             <p>Employer: <strong>{app.employerName || 'N/A'}</strong></p>
                             <p>Income: <strong>{app.monthlyIncome ? formatCurrency(app.monthlyIncome) : 'N/A'}</strong></p>
-                            <p>Monthly EMI: <strong className="text-emerald-700">{app.monthlyEmi ? formatCurrency(app.monthlyEmi) : 'N/A'}</strong></p>
+                            <p>Monthly EMI: <strong className="text-blue-700">{app.monthlyEmi ? formatCurrency(app.monthlyEmi) : 'N/A'}</strong></p>
                           </div>
                         </div>
 

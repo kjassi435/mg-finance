@@ -53,6 +53,28 @@ model LoanApplication {
   itrFiled          Boolean  @default(false)
   documentsUploaded String?  // JSON string of uploaded doc names
 
+  // Additional Personal Details
+  fatherName          String?
+  alternatePhone      String?
+  permanentAddress    String?
+
+  // Additional Loan Details
+  loanPurpose         String?
+
+  // Existing Loan & Financial
+  existingLoan        String?
+  existingLoanDetails String?
+  existingEmi         String?
+  approxCibilScore    String?
+
+  // Document Checklist
+  bankStatement       Boolean  @default(false)
+  salarySlip          Boolean  @default(false)
+  passportPhoto       Boolean  @default(false)
+
+  // Declaration
+  declarationAccepted Boolean  @default(false)
+
   // Application Status
   status            String   @default("PENDING") // PENDING, UNDER_REVIEW, APPROVED, REJECTED
   rejectionReason   String?

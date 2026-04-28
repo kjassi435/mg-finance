@@ -36,7 +36,7 @@ function calculateEMI(principal: number, annualRate: number, tenureMonths: numbe
   return Math.round(emi * 100) / 100
 }
 
-const COLORS = ['#059669', '#f59e0b']
+const COLORS = ['#1d4ed8', '#ef4444']
 
 export function EMICalculator() {
   const { navigate } = useAppStore()
@@ -71,7 +71,7 @@ export function EMICalculator() {
         {/* Back Button */}
         <button
           onClick={() => navigate('landing')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-emerald-600 mb-6 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-blue-700 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
@@ -79,31 +79,31 @@ export function EMICalculator() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-100 rounded-full mb-3">
-            <Calculator className="h-4 w-4 text-emerald-700" />
-            <span className="text-sm font-medium text-emerald-700">EMI Calculator</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 rounded-full mb-3">
+            <Calculator className="h-4 w-4 text-blue-700" />
+            <span className="text-sm font-medium text-blue-700">EMI Calculator</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
             Calculate Your EMI
           </h1>
-          <p className="text-gray-500">Plan your loan with our easy EMI calculator</p>
+          <p className="text-slate-500">Plan your loan with our easy EMI calculator</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
           {/* Input Controls */}
-          <Card className="border-gray-100 shadow-sm">
+          <Card className="border-slate-100 shadow-lg rounded-2xl">
             <CardHeader>
-              <CardTitle className="text-lg">Loan Details</CardTitle>
+              <CardTitle className="text-lg text-slate-900">Loan Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-8">
               {/* Loan Amount */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-gray-700">
+                  <Label className="text-sm font-medium text-slate-700">
                     <IndianRupee className="inline h-4 w-4 mr-1" />
                     Loan Amount
                   </Label>
-                  <span className="text-sm font-bold text-emerald-700">
+                  <span className="text-sm font-bold text-blue-700">
                     {formatCurrency(loanAmount)}
                   </span>
                 </div>
@@ -115,7 +115,7 @@ export function EMICalculator() {
                   step={50000}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-400">
+                <div className="flex justify-between text-xs text-slate-400">
                   <span>₹1 Lakh</span>
                   <span>₹1 Crore</span>
                 </div>
@@ -135,10 +135,10 @@ export function EMICalculator() {
               {/* Interest Rate */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-gray-700">
+                  <Label className="text-sm font-medium text-slate-700">
                     Interest Rate (% p.a.)
                   </Label>
-                  <span className="text-sm font-bold text-emerald-700">
+                  <span className="text-sm font-bold text-blue-700">
                     {interestRate}%
                   </span>
                 </div>
@@ -150,7 +150,7 @@ export function EMICalculator() {
                   step={0.5}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-400">
+                <div className="flex justify-between text-xs text-slate-400">
                   <span>5%</span>
                   <span>25%</span>
                 </div>
@@ -171,10 +171,10 @@ export function EMICalculator() {
               {/* Tenure */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-gray-700">
+                  <Label className="text-sm font-medium text-slate-700">
                     Loan Tenure
                   </Label>
-                  <span className="text-sm font-bold text-emerald-700">
+                  <span className="text-sm font-bold text-blue-700">
                     {tenure} months ({Math.floor(tenure / 12)}y {tenure % 12}m)
                   </span>
                 </div>
@@ -186,7 +186,7 @@ export function EMICalculator() {
                   step={6}
                   className="w-full"
                 />
-                <div className="flex justify-between text-xs text-gray-400">
+                <div className="flex justify-between text-xs text-slate-400">
                   <span>6 months</span>
                   <span>30 years</span>
                 </div>
@@ -206,11 +206,11 @@ export function EMICalculator() {
           {/* Results */}
           <div className="space-y-6">
             {/* EMI Display */}
-            <Card className="border-emerald-200 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-lg">
+            <Card className="border-0 bg-gradient-to-br from-blue-800 to-blue-900 text-white shadow-xl rounded-2xl">
               <CardContent className="p-6 text-center">
-                <p className="text-sm text-emerald-200 mb-1">Monthly EMI</p>
+                <p className="text-sm text-blue-200 mb-1">Monthly EMI</p>
                 <p className="text-4xl md:text-5xl font-black">{formatEMI(emi)}</p>
-                <p className="text-xs text-emerald-200 mt-2">
+                <p className="text-xs text-blue-300 mt-2">
                   for {tenure} months at {interestRate}% interest
                 </p>
               </CardContent>
@@ -218,24 +218,24 @@ export function EMICalculator() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
-              <Card className="border-gray-100">
+              <Card className="border-slate-100 shadow-sm rounded-2xl">
                 <CardContent className="p-4 text-center">
-                  <p className="text-xs text-gray-400 mb-1">Principal Amount</p>
-                  <p className="text-lg font-bold text-gray-800">{formatCurrency(loanAmount)}</p>
+                  <p className="text-xs text-slate-400 mb-1">Principal Amount</p>
+                  <p className="text-lg font-bold text-slate-800">{formatCurrency(loanAmount)}</p>
                 </CardContent>
               </Card>
-              <Card className="border-gray-100">
+              <Card className="border-slate-100 shadow-sm rounded-2xl">
                 <CardContent className="p-4 text-center">
-                  <p className="text-xs text-gray-400 mb-1">Total Interest</p>
-                  <p className="text-lg font-bold text-amber-600">
+                  <p className="text-xs text-slate-400 mb-1">Total Interest</p>
+                  <p className="text-lg font-bold text-red-600">
                     {formatCurrency(Math.round(totalInterest))}
                   </p>
                 </CardContent>
               </Card>
-              <Card className="border-gray-100 col-span-2">
+              <Card className="border-slate-100 shadow-sm rounded-2xl col-span-2">
                 <CardContent className="p-4 text-center">
-                  <p className="text-xs text-gray-400 mb-1">Total Payment</p>
-                  <p className="text-xl font-bold text-gray-900">
+                  <p className="text-xs text-slate-400 mb-1">Total Payment</p>
+                  <p className="text-xl font-bold text-slate-900">
                     {formatCurrency(Math.round(totalAmount))}
                   </p>
                 </CardContent>
@@ -243,9 +243,9 @@ export function EMICalculator() {
             </div>
 
             {/* Pie Chart */}
-            <Card className="border-gray-100">
+            <Card className="border-slate-100 shadow-sm rounded-2xl">
               <CardHeader>
-                <CardTitle className="text-base">Payment Breakdown</CardTitle>
+                <CardTitle className="text-base text-slate-900">Payment Breakdown</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="h-[250px]">
@@ -270,16 +270,16 @@ export function EMICalculator() {
                       <Tooltip
                         formatter={(value: number) => formatCurrency(value)}
                         contentStyle={{
-                          borderRadius: '8px',
+                          borderRadius: '12px',
                           border: '1px solid #e5e7eb',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
                         }}
                       />
                       <Legend
                         verticalAlign="bottom"
                         height={36}
                         formatter={(value) => (
-                          <span className="text-sm text-gray-600">{value}</span>
+                          <span className="text-sm text-slate-600">{value}</span>
                         )}
                       />
                     </PieChart>
@@ -292,7 +292,7 @@ export function EMICalculator() {
             <Button
               onClick={handleApply}
               size="lg"
-              className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg"
+              className="w-full h-12 bg-blue-700 hover:bg-blue-800 text-white font-bold text-lg rounded-2xl shadow-lg shadow-blue-700/20"
             >
               Apply for this Loan
             </Button>

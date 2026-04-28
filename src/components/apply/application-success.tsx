@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useAppStore } from '@/lib/store'
-import { CheckCircle2, ArrowLeft, Eye } from 'lucide-react'
+import { CheckCircle2, ArrowLeft, Eye, Sparkles } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -17,7 +17,10 @@ export function ApplicationSuccess() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md text-center"
       >
-        <Card className="border-emerald-100 shadow-lg">
+        <Card className="border-blue-100 shadow-lg overflow-hidden">
+          {/* Premium gradient header */}
+          <div className="bg-gradient-to-r from-blue-800 to-blue-700 h-2" />
+
           <CardContent className="p-8 md:p-10">
             {/* Success Icon */}
             <motion.div
@@ -26,8 +29,8 @@ export function ApplicationSuccess() {
               transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
               className="mx-auto mb-6"
             >
-              <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
-                <CheckCircle2 className="h-12 w-12 text-emerald-600" />
+              <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mx-auto">
+                <CheckCircle2 className="h-12 w-12 text-blue-700" />
               </div>
             </motion.div>
 
@@ -56,15 +59,15 @@ export function ApplicationSuccess() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-emerald-50 rounded-xl p-4 mb-6 border border-emerald-100"
+              className="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-100"
             >
-              <p className="text-sm text-emerald-600 font-medium mb-1">
+              <p className="text-sm text-blue-700 font-medium mb-1">
                 Your Application ID
               </p>
-              <p className="text-3xl font-black text-emerald-700">
+              <p className="text-3xl font-black text-blue-700">
                 {applicationId || 'N/A'}
               </p>
-              <p className="text-xs text-emerald-500 mt-1">
+              <p className="text-xs text-blue-500 mt-1">
                 Save this ID for tracking your application
               </p>
             </motion.div>
@@ -91,7 +94,7 @@ export function ApplicationSuccess() {
             >
               <Button
                 onClick={() => navigate('dashboard')}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-11"
+                className="w-full bg-blue-700 hover:bg-blue-800 text-white h-11"
               >
                 <Eye className="mr-2 h-4 w-4" />
                 View My Applications

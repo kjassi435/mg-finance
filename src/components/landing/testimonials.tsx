@@ -78,7 +78,7 @@ export function Testimonials() {
   const t = testimonials[current]
 
   return (
-    <section className="py-16 md:py-24 bg-emerald-50/50">
+    <section className="py-16 md:py-24 bg-gradient-to-b from-slate-50 to-white">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <motion.div
@@ -87,20 +87,20 @@ export function Testimonials() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="inline-block px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full mb-3">
+          <span className="inline-block px-3 py-1 text-xs font-bold tracking-wide text-red-700 bg-red-100 rounded-full mb-3 uppercase">
             Customer Stories
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
             हमारे ग्राहक क्या कहते हैं
           </h2>
-          <p className="text-gray-500 max-w-xl mx-auto">
+          <p className="text-slate-500 max-w-xl mx-auto">
             Real stories from real customers who trusted MG Finance for their financial needs.
           </p>
         </motion.div>
 
         {/* Testimonial Card */}
         <div className="max-w-3xl mx-auto">
-          <Card className="border-emerald-100 shadow-md">
+          <Card className="border-l-4 border-l-blue-700 border border-slate-100 shadow-xl rounded-2xl bg-white">
             <CardContent className="p-6 md:p-10">
               <motion.div
                 key={current}
@@ -112,15 +112,15 @@ export function Testimonials() {
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
               >
                 {/* Quote Icon */}
-                <Quote className="h-10 w-10 text-emerald-200 mb-4" />
+                <Quote className="h-10 w-10 text-blue-200 mb-4" />
 
                 {/* Hindi Quote */}
-                <blockquote className="text-lg md:text-xl font-medium text-gray-800 mb-3 leading-relaxed">
+                <blockquote className="text-lg md:text-xl font-medium text-slate-800 mb-3 leading-relaxed">
                   &ldquo;{t.quote}&rdquo;
                 </blockquote>
 
                 {/* English Translation */}
-                <p className="text-sm text-gray-400 italic mb-6">
+                <p className="text-sm text-slate-400 italic mb-6">
                   {t.quoteEn}
                 </p>
 
@@ -129,21 +129,21 @@ export function Testimonials() {
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
-                      className={`h-4 w-4 ${i < t.rating ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}`}
+                      className={`h-4 w-4 ${i < t.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`}
                     />
                   ))}
                 </div>
 
                 {/* Author */}
                 <div className="flex items-center gap-3">
-                  <div className="h-12 w-12 rounded-full bg-emerald-100 flex items-center justify-center">
-                    <span className="text-lg font-bold text-emerald-700">
+                  <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span className="text-lg font-bold text-blue-700">
                       {t.name.charAt(0)}
                     </span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900">{t.name}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-semibold text-slate-900">{t.name}</p>
+                    <p className="text-sm text-slate-500">
                       {t.location} • {t.loanType}
                     </p>
                   </div>
@@ -158,7 +158,7 @@ export function Testimonials() {
               variant="outline"
               size="icon"
               onClick={prev}
-              className="rounded-full border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+              className="rounded-full border-blue-200 hover:bg-blue-50 hover:text-blue-700 bg-white"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -174,8 +174,8 @@ export function Testimonials() {
                   }}
                   className={`h-2.5 rounded-full transition-all ${
                     i === current
-                      ? 'w-8 bg-emerald-600'
-                      : 'w-2.5 bg-emerald-200 hover:bg-emerald-300'
+                      ? 'w-8 bg-blue-700'
+                      : 'w-2.5 bg-blue-200 hover:bg-blue-300'
                   }`}
                 />
               ))}
@@ -185,7 +185,7 @@ export function Testimonials() {
               variant="outline"
               size="icon"
               onClick={next}
-              className="rounded-full border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+              className="rounded-full border-blue-200 hover:bg-blue-50 hover:text-blue-700 bg-white"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>

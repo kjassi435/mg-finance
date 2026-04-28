@@ -81,19 +81,19 @@ export function SignupForm() {
         {/* Back Button */}
         <button
           onClick={() => navigate('landing')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-emerald-600 mb-6 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-blue-700 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Home
         </button>
 
-        <Card className="border-gray-100 shadow-lg">
+        <Card className="border-slate-100 shadow-2xl rounded-2xl">
           <CardHeader className="text-center pb-2">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100 mb-3">
-              <UserPlus className="h-7 w-7 text-emerald-600" />
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-blue-100 mb-3 shadow-sm">
+              <UserPlus className="h-7 w-7 text-blue-700" />
             </div>
-            <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-            <CardDescription>
+            <CardTitle className="text-2xl font-bold text-slate-900">Create Account</CardTitle>
+            <CardDescription className="text-slate-500">
               Join MG Finance and start your loan journey today
             </CardDescription>
           </CardHeader>
@@ -157,7 +157,7 @@ export function SignupForm() {
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
+                className="w-full h-11 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-xl shadow-md shadow-blue-700/20"
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -167,18 +167,18 @@ export function SignupForm() {
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
+                <div className="w-full border-t border-slate-200" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-400">or</span>
+                <span className="bg-white px-2 text-slate-400">or</span>
               </div>
             </div>
 
-            <p className="text-center text-sm text-gray-500">
+            <p className="text-center text-sm text-slate-500">
               Already have an account?{' '}
               <button
                 onClick={() => navigate('login')}
-                className="text-emerald-600 hover:text-emerald-700 font-semibold transition-colors"
+                className="text-blue-700 hover:text-blue-800 font-semibold transition-colors"
               >
                 Sign In
               </button>

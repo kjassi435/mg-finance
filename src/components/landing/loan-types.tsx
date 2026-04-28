@@ -22,7 +22,7 @@ const loanTypes = [
     maxAmount: '₹10 Lakh',
     interestRate: '8% - 12%',
     icon: Landmark,
-    color: 'bg-emerald-100 text-emerald-700',
+    color: 'bg-blue-100 text-blue-700',
   },
   {
     id: 'BUSINESS',
@@ -42,7 +42,7 @@ const loanTypes = [
     maxAmount: '₹20 Lakh',
     interestRate: '12% - 16%',
     icon: Car,
-    color: 'bg-sky-100 text-sky-700',
+    color: 'bg-red-100 text-red-700',
   },
   {
     id: 'HOME',
@@ -52,7 +52,7 @@ const loanTypes = [
     maxAmount: '₹1 Crore',
     interestRate: '8.5% - 14%',
     icon: Home,
-    color: 'bg-rose-100 text-rose-700',
+    color: 'bg-blue-100 text-blue-700',
   },
   {
     id: 'GOLD',
@@ -62,7 +62,7 @@ const loanTypes = [
     maxAmount: '₹25 Lakh',
     interestRate: '10% - 15%',
     icon: Gem,
-    color: 'bg-yellow-100 text-yellow-700',
+    color: 'bg-amber-100 text-amber-700',
   },
 ]
 
@@ -97,13 +97,13 @@ export function LoanTypes() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <span className="inline-block px-3 py-1 text-xs font-semibold text-emerald-700 bg-emerald-100 rounded-full mb-3">
+          <span className="inline-block px-3 py-1 text-xs font-bold tracking-wide text-red-700 bg-red-100 rounded-full mb-3 uppercase">
             Our Loan Products
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
             हर ज़रूरत के लिए लोन
           </h2>
-          <p className="text-gray-500 max-w-2xl mx-auto">
+          <p className="text-slate-500 max-w-2xl mx-auto">
             Loan for every need — from business expansion to buying your dream home.
             Choose the right loan type for you.
           </p>
@@ -121,36 +121,36 @@ export function LoanTypes() {
             const Icon = loan.icon
             return (
               <motion.div key={loan.id} variants={cardVariants}>
-                <Card className="group h-full border border-gray-100 hover:border-emerald-200 hover:shadow-lg transition-all duration-300 cursor-pointer">
+                <Card className="group h-full border border-slate-100 hover:border-blue-200 hover:shadow-xl shadow-lg rounded-2xl transition-all duration-300 cursor-pointer bg-white">
                   <CardContent className="p-5 flex flex-col h-full">
                     {/* Icon */}
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${loan.color}`}>
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${loan.color} shadow-sm`}>
                       <Icon className="h-6 w-6" />
                     </div>
 
                     {/* Title */}
-                    <h3 className="font-bold text-gray-900 text-lg mb-1">{loan.name}</h3>
-                    <p className="text-xs text-emerald-600 font-medium mb-3">{loan.hindiName}</p>
+                    <h3 className="font-bold text-slate-900 text-lg mb-1">{loan.name}</h3>
+                    <p className="text-xs text-blue-700 font-medium mb-3">{loan.hindiName}</p>
 
                     {/* Description */}
-                    <p className="text-sm text-gray-500 mb-4 flex-grow">{loan.description}</p>
+                    <p className="text-sm text-slate-500 mb-4 flex-grow leading-relaxed">{loan.description}</p>
 
                     {/* Stats */}
                     <div className="space-y-2 mb-4">
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Max Amount</span>
-                        <span className="font-semibold text-gray-700">{loan.maxAmount}</span>
+                        <span className="text-slate-400">Max Amount</span>
+                        <span className="font-semibold text-slate-700">{loan.maxAmount}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-gray-400">Interest Rate</span>
-                        <span className="font-semibold text-emerald-600">{loan.interestRate}</span>
+                        <span className="text-slate-400">Interest Rate</span>
+                        <span className="font-semibold text-blue-700">{loan.interestRate}</span>
                       </div>
                     </div>
 
                     {/* Apply Button */}
                     <Button
                       onClick={() => handleApply(loan.id)}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white group-hover:shadow-md transition-all"
+                      className="w-full bg-blue-700 hover:bg-blue-800 text-white group-hover:shadow-md transition-all rounded-xl"
                       size="sm"
                     >
                       Apply Now
