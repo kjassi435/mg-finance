@@ -72,7 +72,11 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: error?.message || "Something went wrong. Please try again." },
+      { 
+        error: error?.message || "Something went wrong. Please try again.",
+        debug_url: process.env.DATABASE_URL,
+        debug_type: typeof process.env.DATABASE_URL
+      },
       { status: 500 }
     );
   }
