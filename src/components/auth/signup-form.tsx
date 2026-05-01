@@ -132,7 +132,7 @@ export function SignupForm() {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+91 98765 43210"
+                  placeholder="+91 78954 07790"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   disabled={loading}

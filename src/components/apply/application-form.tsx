@@ -404,7 +404,7 @@ export function ApplicationForm() {
                         type="tel"
                         value={form.phone}
                         onChange={(e) => updateField('phone', e.target.value)}
-                        placeholder="+91 98765 43210"
+                        placeholder="+91 78954 07790"
                         className="h-11"
                       />
                     </div>
@@ -415,7 +415,7 @@ export function ApplicationForm() {
                         type="tel"
                         value={form.alternatePhone}
                         onChange={(e) => updateField('alternatePhone', e.target.value)}
-                        placeholder="+91 98765 00000"
+                        placeholder="+91 78954 00000"
                         className="h-11"
                       />
                     </div>

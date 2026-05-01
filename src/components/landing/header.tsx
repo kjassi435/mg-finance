@@ -60,11 +60,11 @@ export function Header() {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-3">
             <a
-              href="tel:+919876543210"
+              href="tel:+917895407790"
               className="flex items-center gap-1.5 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors"
             >
               <Phone className="h-4 w-4" />
-              <span>+91 98765 43210</span>
+              <span>+91 78954 07790</span>
             </a>
             <Separator orientation="vertical" className="h-6 bg-slate-200" />
             {user ? (
@@ -158,11 +158,11 @@ export function Header() {
                 </nav>
                 <Separator className="bg-blue-800" />
                 <a
-                  href="tel:+919876543210"
+                  href="tel:+917895407790"
                   className="flex items-center gap-2 text-sm text-amber-400 px-3 py-2 font-medium"
                 >
                   <Phone className="h-4 w-4" />
-                  +91 98765 43210
+                  +91 78954 07790
                 </a>
                 <Separator className="bg-blue-800" />
                 {user ? (

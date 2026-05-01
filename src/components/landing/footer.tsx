@@ -78,11 +78,11 @@ export function Footer() {
             <h3 className="font-semibold text-white mb-4">Contact Us</h3>
             <div className="space-y-3 text-sm">
               <a
-                href="tel:+919876543210"
+                href="tel:+917895407790"
                 className="flex items-center gap-2 hover:text-amber-400 transition-colors"
               >
                 <Phone className="h-4 w-4 text-amber-400 shrink-0" />
-                +91 98765 43210
+                +91 78954 07790
               </a>
               <a
                 href="mailto:info@mgfinance.com"
@@ -106,10 +106,10 @@ export function Footer() {
                 </p>
               </div>
               <a
-                href="tel:+919876543210"
+                href="tel:+917895407790"
                 className="text-lg font-bold text-amber-400 hover:text-amber-300 transition-colors"
               >
-                📞 +91 98765 43210
+                📞 +91 78954 07790
               </a>
             </div>
           </div>
