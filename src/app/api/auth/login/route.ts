@@ -49,10 +49,10 @@ export async function POST(request: NextRequest) {
       token,
       role: user.role,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error);
     return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
+      { error: error?.message || "Something went wrong. Please try again." },
       { status: 500 }
     );
   }

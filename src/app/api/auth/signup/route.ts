@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Signup error:", error);
     return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
+      { error: error?.message || "Something went wrong. Please try again." },
       { status: 500 }
     );
   }
