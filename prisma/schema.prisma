@@ -47,6 +47,11 @@ model LoanApplication {
   monthlyIncome     Float?
   workExperience    String?
 
+  // KYC Document URLs (Vercel Blob integration)
+  aadhaarUrl         String?
+  panUrl             String?
+  passbookUrl        String?
+
   // Document Info (stored as text references, simulated uploads)
   aadhaarNumber     String?
   panNumber         String?
@@ -82,6 +87,13 @@ model LoanApplication {
 
   // Notification tracking
   notificationSent  String?  // JSON of sent notifications
+
+  // Payment Gateway
+  paymentOrderId     String?  // Payment gateway order ID
+  paymentAmount      Float?   // Amount paid
+  paymentMethod      String?  // UPI / PAYTM etc
+  paymentStatus      String   @default("PENDING") // PENDING, COMPLETED, FAILED, REFUNDED
+  paymentCompletedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

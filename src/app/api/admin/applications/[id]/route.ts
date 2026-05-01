@@ -110,6 +110,21 @@ export async function PATCH(
       },
     });
 
+    // Trigger WhatsApp notification (fire-and-forget)
+    if (updatedApplication.user?.phone && (status === 'APPROVED' || status === 'REJECTED' || status === 'UNDER_REVIEW')) {
+      import('@/lib/whatsapp').then(({ notifyStatusChange }) => {
+        notifyStatusChange({
+          phone: updatedApplication.user!.phone!,
+          name: updatedApplication.fullName,
+          applicationId: updatedApplication.applicationId,
+          status,
+          loanType: updatedApplication.loanType,
+          loanAmount: updatedApplication.loanAmount,
+          rejectionReason: status === 'REJECTED' ? rejectionReason : undefined,
+        }).catch((err) => console.error('WhatsApp notification failed:', err));
+      }).catch(() => {});
+    }
+
     return NextResponse.json({
       application: updatedApplication,
       message: `Application ${status === "REJECTED" ? "rejected" : status === "APPROVED" ? "approved" : "updated"} successfully`,

@@ -21,6 +21,15 @@ import {
   MapPin,
   CreditCard,
   ShieldCheck,
+  Users,
+  TrendingUp,
+  Wallet,
+  BarChart3,
+  Phone,
+  Mail,
+  CalendarDays,
+  ArrowUpRight,
+  ArrowDownRight,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -58,7 +67,11 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useToast } from '@/hooks/use-toast'
+
+// ─────────────────────── Types ───────────────────────
 
 interface Application {
   id: string
@@ -89,7 +102,6 @@ interface Application {
   rejectionReason: string | null
   createdAt: string
   updatedAt: string
-  // New fields
   fatherName: string | null
   alternatePhone: string | null
   permanentAddress: string | null
@@ -110,6 +122,49 @@ interface Application {
   }
 }
 
+interface Customer {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  role: string
+  createdAt: string
+  _count: {
+    applications: number
+  }
+}
+
+interface CustomerDetail {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  role: string
+  createdAt: string
+  updatedAt: string
+  applications: {
+    id: string
+    applicationId: string
+    loanType: string
+    loanAmount: number
+    interestRate: number
+    tenure: number
+    status: string
+    processingFeePaid: boolean
+    paymentStatus: string
+    createdAt: string
+  }[]
+  stats: {
+    totalApplications: number
+    approvedCount: number
+    pendingCount: number
+    totalLoanAmount: number
+    feesPaid: number
+  }
+}
+
+// ─────────────────────── Helpers ───────────────────────
+
 function formatCurrency(num: number): string {
   return `₹${num.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
 }
@@ -122,25 +177,38 @@ function formatDate(dateStr: string): string {
   })
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { bg: string; text: string; label: string }> = {
     PENDING: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Pending' },
     UNDER_REVIEW: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Under Review' },
     APPROVED: { bg: 'bg-green-100', text: 'text-green-700', label: 'Approved' },
     REJECTED: { bg: 'bg-red-100', text: 'text-red-700', label: 'Rejected' },
+    COMPLETED: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Completed' },
   }
   const v = map[status] || { bg: 'bg-gray-100', text: 'text-gray-700', label: status }
   return (
-    <Badge className={`${v.bg} ${v.text} border-0 font-semibold`}>
+    <Badge className={`${v.bg} ${v.text} border-0 font-semibold text-xs`}>
       {v.label}
     </Badge>
   )
 }
 
+// ─────────────────────── Component ───────────────────────
+
 export function AdminDashboard() {
   const { user, logout } = useAppStore()
   const { toast } = useToast()
-  const [applications, setApplications] = useState<Application[]>([])
+
+  // ── Shared analytics state ──
   const [statusCounts, setStatusCounts] = useState({
     total: 0,
     PENDING: 0,
@@ -148,14 +216,28 @@ export function AdminDashboard() {
     APPROVED: 0,
     REJECTED: 0,
   })
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const limit = 10
+  const [totalUsers, setTotalUsers] = useState(0)
+  const [totalRevenue, setTotalRevenue] = useState(0)
+  const [analyticsLoading, setAnalyticsLoading] = useState(true)
 
-  // Dialogs
+  // ── Applications state ──
+  const [applications, setApplications] = useState<Application[]>([])
+  const [appLoading, setAppLoading] = useState(true)
+  const [appSearch, setAppSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [appPage, setAppPage] = useState(1)
+  const [appTotalPages, setAppTotalPages] = useState(1)
+  const appLimit = 10
+
+  // ── Customers state ──
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [custLoading, setCustLoading] = useState(false)
+  const [custSearch, setCustSearch] = useState('')
+  const [custPage, setCustPage] = useState(1)
+  const [custTotalPages, setCustTotalPages] = useState(1)
+  const custLimit = 10
+
+  // ── Dialogs: Applications ──
   const [viewApp, setViewApp] = useState<Application | null>(null)
   const [approveApp, setApproveApp] = useState<Application | null>(null)
   const [rejectApp, setRejectApp] = useState<Application | null>(null)
@@ -163,14 +245,64 @@ export function AdminDashboard() {
   const [rejectReason, setRejectReason] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
 
-  const fetchApplications = useCallback(async () => {
+  // ── Dialogs: Customers ──
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false)
+  const [customerDetail, setCustomerDetail] = useState<CustomerDetail | null>(null)
+  const [profileLoading, setProfileLoading] = useState(false)
+
+  // ── Active tab ──
+  const [activeTab, setActiveTab] = useState('applications')
+
+  // ─────────────── Analytics Fetch ───────────────
+
+  const fetchAnalytics = useCallback(async () => {
     if (!user) return
-    setLoading(true)
+    setAnalyticsLoading(true)
     try {
       const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...(search && { search }),
+        page: '1',
+        limit: '1',
+      })
+      const res = await fetch(`/api/admin/applications?${params}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setStatusCounts(data.statusCounts || { total: 0, PENDING: 0, UNDER_REVIEW: 0, APPROVED: 0, REJECTED: 0 })
+        const approved = data.statusCounts?.APPROVED || 0
+        setTotalRevenue(approved * 499)
+      }
+    } catch {
+      // silent
+    }
+    try {
+      const res = await fetch('/api/admin/customers?page=1&limit=1', {
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setTotalUsers(data.pagination?.total || 0)
+      }
+    } catch {
+      // silent
+    }
+    setAnalyticsLoading(false)
+  }, [user])
+
+  useEffect(() => {
+    fetchAnalytics()
+  }, [fetchAnalytics])
+
+  // ─────────────── Applications Fetch ───────────────
+
+  const fetchApplications = useCallback(async () => {
+    if (!user) return
+    setAppLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: appPage.toString(),
+        limit: appLimit.toString(),
+        ...(appSearch && { search: appSearch }),
         ...(statusFilter && { status: statusFilter }),
       })
       const res = await fetch(`/api/admin/applications?${params}`, {
@@ -180,29 +312,97 @@ export function AdminDashboard() {
       if (res.ok) {
         setApplications(data.applications || [])
         setStatusCounts(data.statusCounts || { total: 0, PENDING: 0, UNDER_REVIEW: 0, APPROVED: 0, REJECTED: 0 })
-        setTotalPages(data.pagination?.totalPages || 1)
+        setAppTotalPages(data.pagination?.totalPages || 1)
+        const approved = data.statusCounts?.APPROVED || 0
+        setTotalRevenue(approved * 499)
       } else {
         toast({ title: 'Error', description: data.error, variant: 'destructive' })
       }
     } catch {
       toast({ title: 'Error', description: 'Failed to load applications', variant: 'destructive' })
     } finally {
-      setLoading(false)
+      setAppLoading(false)
     }
-  }, [user, page, search, statusFilter, toast])
+  }, [user, appPage, appSearch, statusFilter, toast])
 
   useEffect(() => {
     fetchApplications()
   }, [fetchApplications])
 
-  const handleSearch = (val: string) => {
-    setSearch(val)
-    setPage(1)
+  // ─────────────── Customers Fetch ───────────────
+
+  const fetchCustomers = useCallback(async () => {
+    if (!user) return
+    setCustLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: custPage.toString(),
+        limit: custLimit.toString(),
+        ...(custSearch && { search: custSearch }),
+      })
+      const res = await fetch(`/api/admin/customers?${params}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setCustomers(data.customers || [])
+        setCustTotalPages(data.pagination?.totalPages || 1)
+      } else {
+        toast({ title: 'Error', description: data.error, variant: 'destructive' })
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to load customers', variant: 'destructive' })
+    } finally {
+      setCustLoading(false)
+    }
+  }, [user, custPage, custSearch, toast])
+
+  useEffect(() => {
+    if (activeTab === 'customers') {
+      fetchCustomers()
+    }
+  }, [activeTab, fetchCustomers])
+
+  // ─────────────── Customer Profile Fetch ───────────────
+
+  const fetchCustomerDetail = async (customerId: string) => {
+    if (!user) return
+    setProfileLoading(true)
+    setProfileDialogOpen(true)
+    try {
+      const res = await fetch(`/api/admin/customers/${customerId}`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setCustomerDetail(data.customer)
+      } else {
+        toast({ title: 'Error', description: data.error, variant: 'destructive' })
+        setProfileDialogOpen(false)
+      }
+    } catch {
+      toast({ title: 'Error', description: 'Failed to load customer profile', variant: 'destructive' })
+      setProfileDialogOpen(false)
+    } finally {
+      setProfileLoading(false)
+    }
+  }
+
+  // ─────────────── Handlers ───────────────
+
+  const handleAppSearch = (val: string) => {
+    setAppSearch(val)
+    setAppPage(1)
   }
 
   const handleStatusFilter = (val: string) => {
     setStatusFilter(val === 'ALL' ? '' : val)
-    setPage(1)
+    setAppPage(1)
+  }
+
+  const handleCustSearch = (val: string) => {
+    setCustSearch(val)
+    setCustPage(1)
   }
 
   const handleApprove = async () => {
@@ -222,6 +422,7 @@ export function AdminDashboard() {
         toast({ title: 'Approved', description: `Application ${approveApp.applicationId} has been approved.` })
         setApproveApp(null)
         fetchApplications()
+        fetchAnalytics()
       } else {
         toast({ title: 'Error', description: data.error, variant: 'destructive' })
       }
@@ -253,6 +454,7 @@ export function AdminDashboard() {
         setRejectApp(null)
         setRejectReason('')
         fetchApplications()
+        fetchAnalytics()
       } else {
         toast({ title: 'Error', description: data.error, variant: 'destructive' })
       }
@@ -276,6 +478,7 @@ export function AdminDashboard() {
         toast({ title: 'Deleted', description: `Application ${deleteApp.applicationId} has been deleted.` })
         setDeleteApp(null)
         fetchApplications()
+        fetchAnalytics()
       } else {
         toast({ title: 'Error', description: data.error, variant: 'destructive' })
       }
@@ -286,219 +489,505 @@ export function AdminDashboard() {
     }
   }
 
+  // ─────────────── Computed Analytics ───────────────
+
+  const conversionRate = statusCounts.total > 0
+    ? ((statusCounts.APPROVED / statusCounts.total) * 100).toFixed(1)
+    : '0.0'
+
+  // ─────────────── Render ───────────────
+
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      <div className="container mx-auto px-4 py-8 md:py-12">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <div className="container mx-auto px-4 py-6 md:py-10 max-w-[1400px]">
+
+        {/* ═══════════ Header ═══════════ */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Admin Dashboard
-            </h1>
-            <p className="text-gray-500 mt-1">
-              Manage all loan applications from one place
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-700 to-blue-900 flex items-center justify-center shadow-lg shadow-blue-700/20">
+                <BarChart3 className="h-5 w-5 text-white" />
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+                Admin Dashboard
+              </h1>
+            </div>
+            <p className="text-gray-500 text-sm ml-[52px]">
+              MG Financial Services — Loan Management Portal
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 ml-auto sm:ml-0">
             <Button
               variant="outline"
-              onClick={fetchApplications}
-              disabled={loading}
-              className="border-gray-200"
+              onClick={() => {
+                fetchAnalytics()
+                fetchApplications()
+                if (activeTab === 'customers') fetchCustomers()
+              }}
+              disabled={appLoading}
+              className="border-gray-200 text-gray-600 hover:bg-gray-50"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 mr-2 ${appLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
             <Button
               variant="outline"
               onClick={logout}
-              className="border-red-200 text-red-600 hover:bg-red-50"
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
             >
               Logout
             </Button>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+        {/* ═══════════ Summary Stats ═══════════ */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
           {[
-            { label: 'Total', value: statusCounts.total, icon: FileText, color: 'bg-gray-100 text-gray-700' },
-            { label: 'Pending', value: statusCounts.PENDING, icon: Clock, color: 'bg-amber-100 text-amber-700' },
-            { label: 'Under Review', value: statusCounts.UNDER_REVIEW, icon: Search, color: 'bg-blue-100 text-blue-700' },
-            { label: 'Approved', value: statusCounts.APPROVED, icon: CheckCircle2, color: 'bg-green-100 text-green-700' },
-            { label: 'Rejected', value: statusCounts.REJECTED, icon: XCircle, color: 'bg-red-100 text-red-700' },
+            {
+              label: 'Total Users',
+              value: totalUsers,
+              icon: Users,
+              gradient: 'from-blue-600 to-blue-800',
+              shadowColor: 'shadow-blue-600/20',
+              bgLight: 'bg-blue-50',
+              textColor: 'text-blue-700',
+            },
+            {
+              label: 'Total Applications',
+              value: statusCounts.total,
+              icon: FileText,
+              gradient: 'from-emerald-600 to-emerald-800',
+              shadowColor: 'shadow-emerald-600/20',
+              bgLight: 'bg-emerald-50',
+              textColor: 'text-emerald-700',
+            },
+            {
+              label: 'Total Revenue',
+              value: formatCurrency(totalRevenue),
+              icon: Wallet,
+              gradient: 'from-amber-500 to-amber-700',
+              shadowColor: 'shadow-amber-500/20',
+              bgLight: 'bg-amber-50',
+              textColor: 'text-amber-700',
+            },
+            {
+              label: 'Pending',
+              value: statusCounts.PENDING,
+              icon: Clock,
+              gradient: 'from-orange-500 to-red-600',
+              shadowColor: 'shadow-orange-500/20',
+              bgLight: 'bg-orange-50',
+              textColor: 'text-orange-700',
+            },
           ].map((stat) => {
             const Icon = stat.icon
             return (
-              <Card key={stat.label} className="border-gray-100">
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${stat.color}`}>
-                    <Icon className="h-5 w-5" />
+              <Card key={stat.label} className="border-gray-100/80 shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-4 md:p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${stat.gradient} ${stat.shadowColor} shadow-lg flex items-center justify-center`}>
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-xs text-gray-500 truncate">{stat.label}</p>
-                  </div>
+                  <p className="text-xl md:text-2xl font-bold text-gray-900 tracking-tight">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5 font-medium">{stat.label}</p>
                 </CardContent>
               </Card>
             )
           })}
         </div>
 
-        {/* Filters */}
-        <Card className="border-gray-100 mb-6">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by name, application ID, or email..."
-                  value={search}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10 h-10"
+        {/* ═══════════ Analytics Cards ═══════════ */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
+          <Card className="border-gray-100/80 shadow-sm bg-gradient-to-br from-blue-700 via-blue-800 to-blue-900 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <CardContent className="p-5 relative">
+              <div className="flex items-center gap-2 mb-2">
+                <Wallet className="h-4 w-4 text-blue-200" />
+                <p className="text-sm font-medium text-blue-100">Total Revenue Collected</p>
+              </div>
+              <p className="text-2xl md:text-3xl font-bold tracking-tight">
+                {formatCurrency(totalRevenue)}
+              </p>
+              <p className="text-xs text-blue-200 mt-1">
+                {statusCounts.APPROVED} approved × ₹499 fee
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-gray-100/80 shadow-sm bg-gradient-to-br from-emerald-600 to-emerald-800 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <CardContent className="p-5 relative">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="h-4 w-4 text-emerald-200" />
+                <p className="text-sm font-medium text-emerald-100">Conversion Rate</p>
+              </div>
+              <div className="flex items-end gap-2">
+                <p className="text-2xl md:text-3xl font-bold tracking-tight">{conversionRate}%</p>
+                <span className="text-emerald-200 text-xs font-medium mb-1">
+                  {statusCounts.APPROVED}/{statusCounts.total} approved
+                </span>
+              </div>
+              <div className="mt-2 w-full bg-white/20 rounded-full h-1.5">
+                <div
+                  className="bg-white rounded-full h-1.5 transition-all duration-500"
+                  style={{ width: `${Math.min(100, parseFloat(conversionRate))}%` }}
                 />
               </div>
-              <Select value={statusFilter || 'ALL'} onValueChange={handleStatusFilter}>
-                <SelectTrigger className="w-full sm:w-44 h-10">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">All Statuses</SelectItem>
-                  <SelectItem value="PENDING">Pending</SelectItem>
-                  <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
-                  <SelectItem value="APPROVED">Approved</SelectItem>
-                  <SelectItem value="REJECTED">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Applications Table */}
-        <Card className="border-gray-100">
-          <CardContent className="p-0">
-            {loading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-                <span className="ml-2 text-gray-500">Loading applications...</span>
+          <Card className="border-gray-100/80 shadow-sm bg-gradient-to-br from-amber-500 via-amber-600 to-amber-800 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+            <CardContent className="p-5 relative">
+              <div className="flex items-center gap-2 mb-2">
+                <IndianRupee className="h-4 w-4 text-amber-200" />
+                <p className="text-sm font-medium text-amber-100">Avg. Loan Amount</p>
               </div>
-            ) : applications.length === 0 ? (
-              <div className="text-center py-16">
-                <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-gray-600">No Applications Found</h3>
-                <p className="text-sm text-gray-400">
-                  {search || statusFilter ? 'Try adjusting your filters.' : 'No applications have been submitted yet.'}
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-gray-50/50">
-                        <TableHead className="font-semibold text-xs">Application ID</TableHead>
-                        <TableHead className="font-semibold text-xs">Applicant</TableHead>
-                        <TableHead className="font-semibold text-xs">Loan Type</TableHead>
-                        <TableHead className="font-semibold text-xs text-right">Amount</TableHead>
-                        <TableHead className="font-semibold text-xs">Status</TableHead>
-                        <TableHead className="font-semibold text-xs">Date</TableHead>
-                        <TableHead className="font-semibold text-xs text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {applications.map((app) => (
-                        <TableRow key={app.id} className="hover:bg-gray-50/50">
-                          <TableCell className="font-medium text-blue-700 text-sm">
-                            {app.applicationId}
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium text-sm text-gray-900">{app.fullName}</p>
-                              <p className="text-xs text-gray-400">{app.email}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-sm">{app.loanType}</TableCell>
-                          <TableCell className="text-sm text-right font-medium">
-                            {formatCurrency(app.loanAmount)}
-                          </TableCell>
-                          <TableCell>
-                            <StatusBadge status={app.status} />
-                          </TableCell>
-                          <TableCell className="text-sm text-gray-500">
-                            {formatDate(app.createdAt)}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8">
-                                  Actions
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setViewApp(app)}>
-                                  <Eye className="h-4 w-4 mr-2" /> View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setApproveApp(app)}>
-                                  <CheckCircle2 className="h-4 w-4 mr-2 text-blue-600" />
-                                  <span className="text-blue-600">Approve</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { setRejectApp(app); setRejectReason('') }}>
-                                  <XCircle className="h-4 w-4 mr-2 text-red-500" />
-                                  <span className="text-red-500">Reject</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => setDeleteApp(app)}
-                                  className="text-red-600"
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+              <p className="text-2xl md:text-3xl font-bold tracking-tight">
+                {statusCounts.total > 0
+                  ? formatCurrency(applications.reduce((s, a) => s + a.loanAmount, 0) / applications.length || 0)
+                  : '₹0'}
+              </p>
+              <p className="text-xs text-amber-200 mt-1">Across all applications</p>
+            </CardContent>
+          </Card>
+        </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between px-4 py-3 border-t">
-                    <p className="text-sm text-gray-500">
-                      Page {page} of {totalPages}
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
+        {/* ═══════════ Tabs ═══════════ */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="bg-gray-100 p-1 mb-6 h-auto">
+            <TabsTrigger
+              value="applications"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-2 text-sm font-medium gap-2 rounded-md"
+            >
+              <FileText className="h-4 w-4" />
+              Applications
+              {statusCounts.total > 0 && (
+                <Badge className="bg-blue-100 text-blue-700 border-0 text-xs h-5 px-1.5 rounded-full">
+                  {statusCounts.total}
+                </Badge>
+              )}
+            </TabsTrigger>
+            <TabsTrigger
+              value="customers"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-2 text-sm font-medium gap-2 rounded-md"
+            >
+              <Users className="h-4 w-4" />
+              Customers
+              {totalUsers > 0 && (
+                <Badge className="bg-emerald-100 text-emerald-700 border-0 text-xs h-5 px-1.5 rounded-full">
+                  {totalUsers}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* ═══════════════════════════════════════════ */}
+          {/* ═══════════ APPLICATIONS TAB ═══════════ */}
+          {/* ═══════════════════════════════════════════ */}
+          <TabsContent value="applications">
+            {/* Filters */}
+            <Card className="border-gray-100/80 shadow-sm mb-4">
+              <CardContent className="p-4">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search by name, application ID, or email..."
+                      value={appSearch}
+                      onChange={(e) => handleAppSearch(e.target.value)}
+                      className="pl-10 h-10"
+                    />
                   </div>
+                  <Select value={statusFilter || 'ALL'} onValueChange={handleStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-44 h-10">
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">All Statuses</SelectItem>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="UNDER_REVIEW">Under Review</SelectItem>
+                      <SelectItem value="APPROVED">Approved</SelectItem>
+                      <SelectItem value="REJECTED">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Table */}
+            <Card className="border-gray-100/80 shadow-sm">
+              <CardContent className="p-0">
+                {appLoading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                    <span className="ml-2 text-gray-500">Loading applications...</span>
+                  </div>
+                ) : applications.length === 0 ? (
+                  <div className="text-center py-16">
+                    <FileText className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-gray-600">No Applications Found</h3>
+                    <p className="text-sm text-gray-400">
+                      {appSearch || statusFilter ? 'Try adjusting your filters.' : 'No applications have been submitted yet.'}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gray-50/80 hover:bg-gray-50/80">
+                            <TableHead className="font-semibold text-xs">Application ID</TableHead>
+                            <TableHead className="font-semibold text-xs">Applicant</TableHead>
+                            <TableHead className="font-semibold text-xs hidden md:table-cell">Loan Type</TableHead>
+                            <TableHead className="font-semibold text-xs text-right">Amount</TableHead>
+                            <TableHead className="font-semibold text-xs">Status</TableHead>
+                            <TableHead className="font-semibold text-xs hidden sm:table-cell">Date</TableHead>
+                            <TableHead className="font-semibold text-xs text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {applications.map((app) => (
+                            <TableRow key={app.id} className="hover:bg-blue-50/30 transition-colors">
+                              <TableCell className="font-medium text-blue-700 text-sm">
+                                {app.applicationId}
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-sm text-gray-900">{app.fullName}</p>
+                                  <p className="text-xs text-gray-400">{app.email}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-sm hidden md:table-cell">
+                                <Badge variant="outline" className="font-normal text-xs">
+                                  {app.loanType}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm text-right font-semibold">
+                                {formatCurrency(app.loanAmount)}
+                              </TableCell>
+                              <TableCell>
+                                <StatusBadge status={app.status} />
+                              </TableCell>
+                              <TableCell className="text-sm text-gray-500 hidden sm:table-cell">
+                                {formatDate(app.createdAt)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="h-8 text-xs">
+                                      Actions
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setViewApp(app)}>
+                                      <Eye className="h-4 w-4 mr-2" /> View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setApproveApp(app)}>
+                                      <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-600" />
+                                      <span className="text-emerald-600">Approve</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => { setRejectApp(app); setRejectReason('') }}>
+                                      <XCircle className="h-4 w-4 mr-2 text-red-500" />
+                                      <span className="text-red-500">Reject</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => setDeleteApp(app)}
+                                      className="text-red-600 focus:text-red-600"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {appTotalPages > 1 && (
+                      <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50/50">
+                        <p className="text-sm text-gray-500">
+                          Page {appPage} of {appTotalPages}
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAppPage((p) => Math.max(1, p - 1))}
+                            disabled={appPage === 1}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setAppPage((p) => Math.min(appTotalPages, p + 1))}
+                            disabled={appPage === appTotalPages}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════ */}
+          {/* ═══════════ CUSTOMERS TAB ═══════════ */}
+          {/* ═══════════════════════════════════════════ */}
+          <TabsContent value="customers">
+            {/* Search */}
+            <Card className="border-gray-100/80 shadow-sm mb-4">
+              <CardContent className="p-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by name, email, or phone..."
+                    value={custSearch}
+                    onChange={(e) => handleCustSearch(e.target.value)}
+                    className="pl-10 h-10"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Table */}
+            <Card className="border-gray-100/80 shadow-sm">
+              <CardContent className="p-0">
+                {custLoading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                    <span className="ml-2 text-gray-500">Loading customers...</span>
+                  </div>
+                ) : customers.length === 0 ? (
+                  <div className="text-center py-16">
+                    <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-gray-600">No Customers Found</h3>
+                    <p className="text-sm text-gray-400">
+                      {custSearch ? 'Try adjusting your search.' : 'No customers have registered yet.'}
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow className="bg-gray-50/80 hover:bg-gray-50/80">
+                            <TableHead className="font-semibold text-xs">Customer</TableHead>
+                            <TableHead className="font-semibold text-xs hidden sm:table-cell">Email</TableHead>
+                            <TableHead className="font-semibold text-xs hidden md:table-cell">Phone</TableHead>
+                            <TableHead className="font-semibold text-xs text-center">Apps</TableHead>
+                            <TableHead className="font-semibold text-xs hidden sm:table-cell">Joined</TableHead>
+                            <TableHead className="font-semibold text-xs text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {customers.map((cust) => (
+                            <TableRow key={cust.id} className="hover:bg-blue-50/30 transition-colors">
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-9 w-9 bg-gradient-to-br from-blue-600 to-blue-800 text-white">
+                                    <AvatarFallback className="text-xs font-bold bg-transparent">
+                                      {getInitials(cust.name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="font-medium text-sm text-gray-900">{cust.name}</p>
+                                    <p className="text-xs text-gray-400 sm:hidden">{cust.email}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-sm text-gray-600 hidden sm:table-cell">
+                                {cust.email}
+                              </TableCell>
+                              <TableCell className="text-sm text-gray-600 hidden md:table-cell">
+                                {cust.phone || '—'}
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge
+                                  variant="outline"
+                                  className={`font-semibold text-xs ${
+                                    cust._count.applications > 0
+                                      ? 'border-blue-200 text-blue-700 bg-blue-50'
+                                      : 'border-gray-200 text-gray-400'
+                                  }`}
+                                >
+                                  {cust._count.applications}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm text-gray-500 hidden sm:table-cell">
+                                {formatDate(cust.createdAt)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                                  onClick={() => fetchCustomerDetail(cust.id)}
+                                >
+                                  <Eye className="h-4 w-4 mr-1.5" />
+                                  View Profile
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    {/* Pagination */}
+                    {custTotalPages > 1 && (
+                      <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50/50">
+                        <p className="text-sm text-gray-500">
+                          Page {custPage} of {custTotalPages}
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCustPage((p) => Math.max(1, p - 1))}
+                            disabled={custPage === 1}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCustPage((p) => Math.min(custTotalPages, p + 1))}
+                            disabled={custPage === custTotalPages}
+                          >
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
 
-      {/* View Details Dialog */}
+      {/* ═══════════════════════════════════════════════════════ */}
+      {/* ═══════════ DIALOGS ═══════════ */}
+      {/* ═══════════════════════════════════════════════════════ */}
+
+      {/* ── View Application Details Dialog ── */}
       <Dialog open={!!viewApp} onOpenChange={() => setViewApp(null)}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Application Details — {viewApp?.applicationId}</DialogTitle>
+            <DialogTitle className="text-lg">Application Details — {viewApp?.applicationId}</DialogTitle>
             <DialogDescription>Full information about this loan application</DialogDescription>
           </DialogHeader>
           {viewApp && (
@@ -510,7 +999,6 @@ export function AdminDashboard() {
                   Applied on {formatDate(viewApp.createdAt)}
                 </span>
               </div>
-
               <Separator />
 
               {/* Personal */}
@@ -540,7 +1028,6 @@ export function AdminDashboard() {
                   </p>
                 )}
               </div>
-
               <Separator />
 
               {/* Loan Details */}
@@ -559,7 +1046,6 @@ export function AdminDashboard() {
                   <div><span className="text-gray-400">Fee Paid:</span> <strong>{viewApp.processingFeePaid ? 'Yes' : 'No'}</strong></div>
                 </div>
               </div>
-
               <Separator />
 
               {/* Employment */}
@@ -583,7 +1069,6 @@ export function AdminDashboard() {
                   )}
                 </div>
               </div>
-
               <Separator />
 
               {/* Documents */}
@@ -605,7 +1090,6 @@ export function AdminDashboard() {
                   </div>
                 </div>
               </div>
-
               <Separator />
 
               {/* Declaration */}
@@ -635,12 +1119,12 @@ export function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Approve Dialog */}
+      {/* ── Approve Dialog ── */}
       <Dialog open={!!approveApp} onOpenChange={() => setApproveApp(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-blue-600" />
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
               Approve Application
             </DialogTitle>
             <DialogDescription>
@@ -656,7 +1140,7 @@ export function AdminDashboard() {
             <Button
               onClick={handleApprove}
               disabled={actionLoading}
-              className="bg-blue-700 hover:bg-blue-800 text-white"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
             >
               {actionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Approve
@@ -665,7 +1149,7 @@ export function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Reject Dialog */}
+      {/* ── Reject Dialog ── */}
       <Dialog open={!!rejectApp} onOpenChange={() => setRejectApp(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -704,7 +1188,7 @@ export function AdminDashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Dialog */}
+      {/* ── Delete Dialog ── */}
       <Dialog open={!!deleteApp} onOpenChange={() => setDeleteApp(null)}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -730,6 +1214,139 @@ export function AdminDashboard() {
               Delete
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Customer Profile Dialog ── */}
+      <Dialog open={profileDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setProfileDialogOpen(false)
+          setCustomerDetail(null)
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Customer Profile</DialogTitle>
+            <DialogDescription>Detailed customer information and application history</DialogDescription>
+          </DialogHeader>
+
+          {profileLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <span className="ml-2 text-gray-500">Loading profile...</span>
+            </div>
+          ) : customerDetail ? (
+            <div className="space-y-6">
+              {/* Customer Info Header */}
+              <div className="flex items-start gap-4">
+                <Avatar className="h-14 w-14 bg-gradient-to-br from-blue-600 to-blue-800 text-white shrink-0">
+                  <AvatarFallback className="text-lg font-bold bg-transparent">
+                    {getInitials(customerDetail.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-xl font-bold text-gray-900">{customerDetail.name}</h2>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Mail className="h-3.5 w-3.5" /> {customerDetail.email}
+                    </span>
+                    {customerDetail.phone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="h-3.5 w-3.5" /> {customerDetail.phone}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1">
+                      <CalendarDays className="h-3.5 w-3.5" /> Joined {formatDate(customerDetail.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-blue-50 rounded-xl p-3.5 text-center">
+                  <p className="text-2xl font-bold text-blue-700">{customerDetail.stats.totalApplications}</p>
+                  <p className="text-xs text-blue-600 font-medium mt-0.5">Total Apps</p>
+                </div>
+                <div className="bg-emerald-50 rounded-xl p-3.5 text-center">
+                  <p className="text-2xl font-bold text-emerald-700">{customerDetail.stats.approvedCount}</p>
+                  <p className="text-xs text-emerald-600 font-medium mt-0.5">Approved</p>
+                </div>
+                <div className="bg-amber-50 rounded-xl p-3.5 text-center">
+                  <p className="text-2xl font-bold text-amber-700">{customerDetail.stats.pendingCount}</p>
+                  <p className="text-xs text-amber-600 font-medium mt-0.5">Pending</p>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-3.5 text-center">
+                  <p className="text-2xl font-bold text-purple-700">{customerDetail.stats.feesPaid}</p>
+                  <p className="text-xs text-purple-600 font-medium mt-0.5">Fees Paid</p>
+                </div>
+              </div>
+
+              {/* Financial Summary */}
+              <div className="grid grid-cols-2 gap-3">
+                <Card className="bg-gradient-to-br from-blue-700 to-blue-900 text-white border-0">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-blue-200 font-medium mb-1">Total Loan Amount</p>
+                    <p className="text-xl font-bold">{formatCurrency(customerDetail.stats.totalLoanAmount)}</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-gradient-to-br from-amber-500 to-amber-700 text-white border-0">
+                  <CardContent className="p-4">
+                    <p className="text-xs text-amber-100 font-medium mb-1">Revenue from Customer</p>
+                    <p className="text-xl font-bold">{formatCurrency(customerDetail.stats.feesPaid * 499)}</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Applications List */}
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3 flex items-center gap-1.5">
+                  <FileText className="h-4 w-4" /> Application History
+                  <Badge variant="outline" className="text-xs ml-auto font-normal">
+                    {customerDetail.applications.length} total
+                  </Badge>
+                </h3>
+                {customerDetail.applications.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg">
+                    <FileText className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">No applications yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {customerDetail.applications.map((app) => (
+                      <div
+                        key={app.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-blue-50/50 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center shrink-0">
+                            <IndianRupee className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-blue-700">{app.applicationId}</p>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <span>{app.loanType}</span>
+                              <span className="text-gray-300">•</span>
+                              <span className="font-medium text-gray-700">{formatCurrency(app.loanAmount)}</span>
+                              <span className="text-gray-300">•</span>
+                              <span className={app.processingFeePaid ? 'text-emerald-600' : 'text-gray-400'}>
+                                Fee: {app.processingFeePaid ? 'Paid' : 'Unpaid'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="shrink-0 ml-2">
+                          <StatusBadge status={app.status} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
         </DialogContent>
       </Dialog>
     </div>

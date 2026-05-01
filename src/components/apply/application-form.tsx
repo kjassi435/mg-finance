@@ -14,6 +14,8 @@ import {
   CreditCard,
   AlertTriangle,
   ShieldCheck,
+  Upload,
+  BookOpen,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -101,6 +103,10 @@ interface FormData {
   // Declarations
   declarationAccepted: boolean
   serviceFeeAccepted: boolean
+  // KYC Images
+  aadhaarImage: File | null
+  panImage: File | null
+  passbookImage: File | null
 }
 
 export function ApplicationForm() {
@@ -142,9 +148,12 @@ export function ApplicationForm() {
     docChecklist: {},
     declarationAccepted: false,
     serviceFeeAccepted: false,
+    aadhaarImage: null,
+    panImage: null,
+    passbookImage: null,
   })
 
-  const updateField = (field: keyof FormData, value: string | number | boolean | string[] | Record<string, boolean>) => {
+  const updateField = (field: keyof FormData, value: string | number | boolean | string[] | Record<string, boolean> | File | null) => {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -226,6 +235,17 @@ export function ApplicationForm() {
       ...prev,
       documents: prev.documents.filter((_, i) => i !== index),
     }))
+  }
+
+  const handleKycUpload = (field: 'aadhaarImage' | 'panImage' | 'passbookImage', e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({ title: 'File Too Large', description: 'Maximum file size is 5MB.', variant: 'destructive' })
+        return
+      }
+      updateField(field, file)
+    }
   }
 
   const handleSubmit = async () => {
@@ -784,6 +804,75 @@ export function ApplicationForm() {
 
                   <Separator />
 
+                  {/* KYC Image Uploads */}
+                  <div className="space-y-3">
+                    <Label className="text-blue-700 font-semibold">KYC Document Images</Label>
+                    <p className="text-xs text-gray-500">Upload clear images of your KYC documents</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {/* Aadhaar Card Image */}
+                      <div className="border-2 border-dashed border-blue-200 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group">
+                        <input type="file" accept=".jpg,.jpeg,.png" className="hidden" id="kyc-aadhaar" onChange={(e) => handleKycUpload('aadhaarImage', e)} />
+                        <label htmlFor="kyc-aadhaar" className="cursor-pointer">
+                          {form.aadhaarImage ? (
+                            <div className="flex items-center gap-2 justify-center">
+                              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                              <span className="text-sm font-medium text-green-700 truncate max-w-[100px]">{form.aadhaarImage.name}</span>
+                              <button type="button" onClick={(e) => { e.preventDefault(); updateField('aadhaarImage', null) }} className="text-xs text-red-500 hover:text-red-700 ml-1 shrink-0">Remove</button>
+                            </div>
+                          ) : (
+                            <>
+                              <CreditCard className="h-6 w-6 text-blue-300 mx-auto mb-1 group-hover:text-blue-500 transition-colors" />
+                              <p className="text-xs text-gray-500">Upload Aadhaar Card</p>
+                              <p className="text-[10px] text-gray-400">JPG, PNG up to 5MB</p>
+                            </>
+                          )}
+                        </label>
+                      </div>
+
+                      {/* PAN Card Image */}
+                      <div className="border-2 border-dashed border-blue-200 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group">
+                        <input type="file" accept=".jpg,.jpeg,.png" className="hidden" id="kyc-pan" onChange={(e) => handleKycUpload('panImage', e)} />
+                        <label htmlFor="kyc-pan" className="cursor-pointer">
+                          {form.panImage ? (
+                            <div className="flex items-center gap-2 justify-center">
+                              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                              <span className="text-sm font-medium text-green-700 truncate max-w-[100px]">{form.panImage.name}</span>
+                              <button type="button" onClick={(e) => { e.preventDefault(); updateField('panImage', null) }} className="text-xs text-red-500 hover:text-red-700 ml-1 shrink-0">Remove</button>
+                            </div>
+                          ) : (
+                            <>
+                              <CreditCard className="h-6 w-6 text-blue-300 mx-auto mb-1 group-hover:text-blue-500 transition-colors" />
+                              <p className="text-xs text-gray-500">Upload PAN Card</p>
+                              <p className="text-[10px] text-gray-400">JPG, PNG up to 5MB</p>
+                            </>
+                          )}
+                        </label>
+                      </div>
+
+                      {/* Bank Passbook Image */}
+                      <div className="border-2 border-dashed border-blue-200 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group">
+                        <input type="file" accept=".jpg,.jpeg,.png" className="hidden" id="kyc-passbook" onChange={(e) => handleKycUpload('passbookImage', e)} />
+                        <label htmlFor="kyc-passbook" className="cursor-pointer">
+                          {form.passbookImage ? (
+                            <div className="flex items-center gap-2 justify-center">
+                              <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                              <span className="text-sm font-medium text-green-700 truncate max-w-[100px]">{form.passbookImage.name}</span>
+                              <button type="button" onClick={(e) => { e.preventDefault(); updateField('passbookImage', null) }} className="text-xs text-red-500 hover:text-red-700 ml-1 shrink-0">Remove</button>
+                            </div>
+                          ) : (
+                            <>
+                              <BookOpen className="h-6 w-6 text-blue-300 mx-auto mb-1 group-hover:text-blue-500 transition-colors" />
+                              <p className="text-xs text-gray-500">Upload Bank Passbook</p>
+                              <p className="text-[10px] text-gray-400">JPG, PNG up to 5MB</p>
+                            </>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
                   <div className="space-y-3">
                     <Label className="text-blue-700">Upload Documents (Optional)</Label>
                     <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-blue-300 transition-colors">
@@ -939,59 +1028,54 @@ export function ApplicationForm() {
 
                   <Separator />
 
-                  {/* Service Fee Box */}
-                  <div className="p-4 rounded-xl border-2 border-red-200 bg-red-50">
+                  {/* Processing Fee Notice */}
+                  <div className="p-4 bg-gradient-to-r from-red-50 to-amber-50 rounded-xl border-2 border-red-200">
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5">
-                        <AlertTriangle className="h-5 w-5 text-red-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-red-800 text-base">Service Fee - ₹499</p>
-                        <p className="text-sm text-red-700 mt-1">
-                          This is a one-time service fee for processing your loan application. This fee is <strong>NON-REFUNDABLE</strong> under any circumstances.
+                      <AlertTriangle className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="font-bold text-red-800 text-sm">Processing Fee - ₹499 (Non-Refundable)</h4>
+                        <p className="text-xs text-red-700 mt-1">
+                          लोन प्रोसेसिंग शुल्क ₹499 (नॉन-रिफंडेबल) - आवेदन जमा करने के बाद भुगतान किया जाएगा।
                         </p>
-                        <div className="flex items-center gap-2 mt-3">
-                          <Checkbox
-                            id="service-fee"
-                            checked={form.serviceFeeAccepted}
-                            onCheckedChange={(checked) => updateField('serviceFeeAccepted', !!checked)}
-                            className="data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
-                          />
-                          <Label htmlFor="service-fee" className="cursor-pointer text-sm text-red-800 font-medium">
-                            I agree to pay the non-refundable service fee of ₹499 and understand that this amount will not be refunded.
-                          </Label>
-                        </div>
+                        <p className="text-xs text-red-600 mt-0.5">
+                          This is a one-time, non-refundable service fee for processing your loan application. Payment will be collected after submission.
+                        </p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Declaration Box */}
-                  <div className="p-4 rounded-xl border-2 border-amber-200 bg-amber-50">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5">
-                        <ShieldCheck className="h-5 w-5 text-amber-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-bold text-amber-800 text-base">Declaration / घोषणा</p>
-                        <p className="text-sm text-amber-700 mt-1">
-                          मैं घोषणा करता/करती हूँ कि ऊपर दी गई सभी जानकारी सही है। गलत जानकारी देने पर मेरी एप्लीकेशन रद्द की जा सकती है।
-                        </p>
-                        <p className="text-sm text-amber-700 mt-1 italic">
-                          I declare that all the information provided above is true and correct. The application may be rejected if any information is found false.
-                        </p>
-                        <div className="flex items-center gap-2 mt-3">
-                          <Checkbox
-                            id="declaration"
-                            checked={form.declarationAccepted}
-                            onCheckedChange={(checked) => updateField('declarationAccepted', !!checked)}
-                            className="data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
-                          />
-                          <Label htmlFor="declaration" className="cursor-pointer text-sm text-amber-800 font-medium">
-                            I accept the above declaration / मैं उपरोक्त घोषणा स्वीकार करता/करती हूँ
-                          </Label>
-                        </div>
-                      </div>
-                    </div>
+                  {/* Declaration Checkbox (bilingual) */}
+                  <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <Checkbox
+                      id="declaration"
+                      checked={form.declarationAccepted}
+                      onCheckedChange={(checked) => updateField('declarationAccepted', !!checked)}
+                      className="data-[state=checked]:bg-blue-700 data-[state=checked]:border-blue-700 mt-0.5"
+                    />
+                    <Label htmlFor="declaration" className="cursor-pointer text-sm leading-relaxed">
+                      <strong>Declaration / घोषणा:</strong><br />
+                      I hereby declare that all the information provided is true and correct to the best of my knowledge. I authorize MG Financial Services to verify my details and contact me regarding this loan application.
+                      <br /><br />
+                      <span className="text-gray-500">
+                        मैं यहाँ घोषणा करता/करती हूँ कि मैंने दी गई सभी जानकारी सही और प्रामाणिक है। मैं MG Financial Services को मेरी जानकारी सत्यापित करने और इस लोन आवेदन के संबंध में मुझसे संपर्क करने का अधिकार देता/देती हूँ।
+                      </span>
+                    </Label>
+                  </div>
+
+                  {/* Service Fee Checkbox (bilingual) */}
+                  <div className="flex items-start gap-3 p-4 bg-red-50 rounded-xl border-2 border-red-200">
+                    <Checkbox
+                      id="serviceFee"
+                      checked={form.serviceFeeAccepted}
+                      onCheckedChange={(checked) => updateField('serviceFeeAccepted', !!checked)}
+                      className="data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600 mt-0.5"
+                    />
+                    <Label htmlFor="serviceFee" className="cursor-pointer text-sm leading-relaxed">
+                      <strong className="text-red-800">I agree to pay the Non-Refundable Service Fee of ₹499</strong><br />
+                      <span className="text-red-700 text-xs">
+                        मैं ₹499 का नॉन-रिफंडेबल सर्विस फी देने के लिए सहमत हूँ। यह शुल्क लोन प्रोसेसिंग के लिए है और इसे वापस नहीं किया जाएगा।
+                      </span>
+                    </Label>
                   </div>
 
                   {!canSubmit && (
@@ -1025,11 +1109,26 @@ export function ApplicationForm() {
                 ) : (
                   <Button
                     onClick={handleSubmit}
-                    disabled={loading || !canSubmit}
-                    className="bg-blue-700 hover:bg-blue-800 text-white"
+                    disabled={!canSubmit || loading}
+                    className={`w-full h-12 font-bold text-lg rounded-xl shadow-lg transition-all ${
+                      canSubmit
+                        ? 'bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white shadow-blue-700/30'
+                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
                   >
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {loading ? 'Submitting...' : 'Submit Application'}
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Submitting Application...
+                      </>
+                    ) : canSubmit ? (
+                      <>
+                        Submit Application
+                        <CheckCircle2 className="ml-2 h-5 w-5" />
+                      </>
+                    ) : (
+                      'Please accept both declarations to submit'
+                    )}
                   </Button>
                 )}
               </div>
