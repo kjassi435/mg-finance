@@ -3,6 +3,6 @@ import 'dotenv/config';
 
 export default defineConfig({
   datasource: {
-    url: process.env.DATABASE_URL || "libsql://mg-finance-kjassi435.aws-ap-south-1.turso.io",
+    url: (process.env.DATABASE_URL && process.env.DATABASE_URL !== "undefined") ? process.env.DATABASE_URL : "libsql://mg-finance-kjassi435.aws-ap-south-1.turso.io",
   },
 });

@@ -5,31 +5,34 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-// We only initialize the adapter and client if we have the necessary credentials.
-// During some build steps, environment variables might not be fully populated.
-// Use bracket notation to prevent Next.js from statically replacing it with undefined at build time
-let url = process.env['DATABASE_URL'] || process.env.DATABASE_URL;
-let authToken = process.env['TURSO_AUTH_TOKEN'] || process.env.TURSO_AUTH_TOKEN;
+// Hardcoded fallback values to guarantee no "undefined" errors
+const FALLBACK_URL = "libsql://mg-finance-kjassi435.aws-ap-south-1.turso.io";
+const FALLBACK_TOKEN = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3Nzc2NDMzMzksImlkIjoiMDE5ZGUzY2MtOGMwMS03NDZkLTgwMzQtNTA2MDQzZGI0NjEyIiwicmlkIjoiYWJhNjE2OTQtMjVlMS00ZWQxLTg4N2QtNWQ5OTg3MGQwOTJiIn0.tqB17PEos4B8101BdAU5U3bWI41pLwHeMBat0xl8RaJH9xM4TVy7k-hrMPHDjs1ESZ-16CMogKOTW-wH5YFpDw";
 
-if (url === "undefined" || !url) {
-  url = "libsql://mg-finance-kjassi435.aws-ap-south-1.turso.io";
-  // Force it into process.env so Prisma's WASM engine can read it if config is missing
-  process.env.DATABASE_URL = url;
-}
+// Safely get env vars, treating the literal string "undefined" as empty
+const getSafeEnv = (key: string, fallback: string) => {
+  const val = process.env[key];
+  if (!val || val === "undefined" || val === "null") {
+    return fallback;
+  }
+  return val;
+};
 
-if (authToken === "undefined" || !authToken) {
-  authToken = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3Nzc2NDMzMzksImlkIjoiMDE5ZGUzY2MtOGMwMS03NDZkLTgwMzQtNTA2MDQzZGI0NjEyIiwicmlkIjoiYWJhNjE2OTQtMjVlMS00ZWQxLTg4N2QtNWQ5OTg3MGQwOTJiIn0.tqB17PEos4B8101BdAU5U3bWI41pLwHeMBat0xl8RaJH9xM4TVy7k-hrMPHDjs1ESZ-16CMogKOTW-wH5YFpDw";
-  process.env.TURSO_AUTH_TOKEN = authToken;
-}
+let rawUrl = getSafeEnv('DATABASE_URL', FALLBACK_URL);
+let authToken = getSafeEnv('TURSO_AUTH_TOKEN', FALLBACK_TOKEN);
 
-let cleanUrl = url;
+// Remove authToken from URL if it's there, as PrismaLibSql expects it separately
+let cleanUrl = rawUrl;
 if (cleanUrl.includes('?')) {
   cleanUrl = cleanUrl.split('?')[0];
 }
 
+// Force the env var for the Prisma WASM engine just in case it reads it directly
+process.env.DATABASE_URL = cleanUrl;
+
 const adapter = new PrismaLibSql({
   url: cleanUrl,
-  ...(authToken ? { authToken } : {})
+  authToken: authToken
 });
 
 export const db =
