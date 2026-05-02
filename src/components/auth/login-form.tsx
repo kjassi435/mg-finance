@@ -179,14 +179,7 @@ export function LoginForm() {
               </>
             )}
 
-            {/* Admin Hint */}
-            {isAdmin && (
-              <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                <p className="text-xs text-amber-700">
-                  <strong>Demo:</strong> admin@mgfinance.com / admin123
-                </p>
-              </div>
-            )}
+
           </CardContent>
         </Card>
       </div>
