@@ -22,8 +22,13 @@ if (authToken === "undefined" || !authToken) {
   process.env.TURSO_AUTH_TOKEN = authToken;
 }
 
+let cleanUrl = url;
+if (cleanUrl.includes('?')) {
+  cleanUrl = cleanUrl.split('?')[0];
+}
+
 const adapter = new PrismaLibSql({
-  url: url,
+  url: cleanUrl,
   ...(authToken ? { authToken } : {})
 });
 
