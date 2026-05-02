@@ -12,13 +12,15 @@ const globalForPrisma = globalThis as unknown as {
 let url = process.env['DATABASE_URL'] || process.env.DATABASE_URL;
 let authToken = process.env['TURSO_AUTH_TOKEN'] || process.env.TURSO_AUTH_TOKEN;
 
-// Fix for Vercel injecting literal "undefined" string when env var is missing
 if (url === "undefined" || !url) {
   url = "libsql://mg-finance-kjassi435.aws-ap-south-1.turso.io";
+  // Force it into process.env so Prisma's WASM engine can read it if config is missing
+  process.env.DATABASE_URL = url;
 }
 
 if (authToken === "undefined" || !authToken) {
   authToken = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3Nzc2NDMzMzksImlkIjoiMDE5ZGUzY2MtOGMwMS03NDZkLTgwMzQtNTA2MDQzZGI0NjEyIiwicmlkIjoiYWJhNjE2OTQtMjVlMS00ZWQxLTg4N2QtNWQ5OTg3MGQwOTJiIn0.tqB17PEos4B8101BdAU5U3bWI41pLwHeMBat0xl8RaJH9xM4TVy7k-hrMPHDjs1ESZ-16CMogKOTW-wH5YFpDw";
+  process.env.TURSO_AUTH_TOKEN = authToken;
 }
 
 const libsql = createClient({
