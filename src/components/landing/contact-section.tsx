@@ -141,7 +141,7 @@ export function ContactSection() {
             <Card className="h-full border-none shadow-xl overflow-hidden rounded-2xl relative group">
               <div className="absolute inset-0 bg-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10" />
               <iframe
-                src="https://maps.google.com/maps?q=Tariyal%20Complex,%20Bhaniyawala,%20Dehradun&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=Blackbox%20Cafe,%20Bhaniyawala,%20Dehradun&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
