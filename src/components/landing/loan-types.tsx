@@ -90,6 +90,34 @@ export function LoanTypes() {
   return (
     <section className="py-16 md:py-24 bg-background">
       <div className="container mx-auto px-4">
+        {/* Partners Marquee */}
+        <div className="w-full overflow-hidden mb-16 relative py-4">
+          <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
+          <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
+            <div className="flex gap-12 md:gap-24 items-center px-6 md:px-12">
+              {[...Array(12)].map((_, i) => (
+                <img 
+                  key={`logo-1-${i}`} 
+                  src={`/images/partners/logo-${i + 1}.png`} 
+                  alt={`Partner ${i + 1}`} 
+                  className="h-10 md:h-14 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300 drop-shadow-sm" 
+                />
+              ))}
+            </div>
+            <div className="flex gap-12 md:gap-24 items-center px-6 md:px-12">
+              {[...Array(12)].map((_, i) => (
+                <img 
+                  key={`logo-2-${i}`} 
+                  src={`/images/partners/logo-${i + 1}.png`} 
+                  alt={`Partner ${i + 1}`} 
+                  className="h-10 md:h-14 w-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300 drop-shadow-sm" 
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
