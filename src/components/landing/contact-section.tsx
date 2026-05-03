@@ -80,8 +80,7 @@ export function ContactSection() {
                     <div>
                       <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Office Address</p>
                       <p className="text-slate-900 font-medium">
-                        Tariyal Complex, Hotel Doon,<br />
-                        In front of Jayka, Bhaniyawala,<br />
+                        Tariyal Complex, Bhaniyawala,<br />
                         Dehradun, Uttarakhand
                       </p>
                     </div>
@@ -142,7 +141,7 @@ export function ContactSection() {
             <Card className="h-full border-none shadow-xl overflow-hidden rounded-2xl relative group">
               <div className="absolute inset-0 bg-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10" />
               <iframe
-                src="https://maps.google.com/maps?q=Tariyal%20Complex,%20Hotel%20Doon,%20In%20front%20of%20Jayka,%20Bhaniyawala,%20Dehradun,%20Uttarakhand&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                src="https://maps.google.com/maps?q=Tariyal%20Complex,%20Bhaniyawala,%20Dehradun&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

@@ -26,9 +26,7 @@ export function Footer() {
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="h-4 w-4 text-amber-400 shrink-0" />
               <span>
-                Tariyal Complex, Hotel Doon,
-                <br />
-                In front of Jayka, Bhaniyawala,
+                Tariyal Complex, Bhaniyawala,
                 <br />
                 Dehradun, Uttarakhand
               </span>
