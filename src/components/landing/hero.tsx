@@ -9,27 +9,30 @@ export function Hero() {
   const { navigate } = useAppStore()
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
-      {/* Geometric Pattern Overlay */}
-      <div className="absolute inset-0 opacity-[0.04]" style={{
-        backgroundImage: `
-          linear-gradient(30deg, rgba(255,255,255,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.1) 87.5%),
-          linear-gradient(150deg, rgba(255,255,255,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.1) 87.5%),
-          linear-gradient(30deg, rgba(255,255,255,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.1) 87.5%),
-          linear-gradient(150deg, rgba(255,255,255,0.1) 12%, transparent 12.5%, transparent 87%, rgba(255,255,255,0.1) 87.5%)
-        `,
-        backgroundSize: '80px 140px',
-        backgroundPosition: '0 0, 0 0, 40px 70px, 40px 70px'
-      }} />
+    <section className="relative overflow-hidden min-h-[90vh] flex items-center bg-slate-950">
+      {/* Background Image with Zoom Out Effect */}
+      <motion.div
+        initial={{ scale: 1.2 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 25, ease: "easeOut" }}
+        className="absolute inset-0 z-0"
+      >
+        <div className="absolute inset-0 bg-blue-950/80 z-10 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-900/60 via-transparent to-slate-950/90 z-10" />
+        <img 
+          src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?q=80&w=2070&auto=format&fit=crop" 
+          alt="MG Finance Services Background" 
+          className="w-full h-full object-cover object-center"
+        />
+      </motion.div>
 
       {/* Golden Light Orbs */}
-      <div className="absolute inset-0">
-        <div className="absolute top-10 left-[15%] w-72 h-72 bg-amber-500/15 rounded-full blur-[100px]" />
-        <div className="absolute bottom-20 right-[10%] w-96 h-96 bg-amber-400/10 rounded-full blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px]" />
+      <div className="absolute inset-0 z-10">
+        <div className="absolute top-10 left-[15%] w-72 h-72 bg-amber-500/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-20 right-[10%] w-96 h-96 bg-amber-400/15 rounded-full blur-[120px]" />
       </div>
 
-      <div className="relative container mx-auto px-4 py-16 md:py-24 lg:py-32">
+      <div className="relative z-20 container mx-auto px-4 py-16 md:py-24 lg:py-32">
         <div className="max-w-4xl mx-auto text-center">
           {/* Red Accent Badge */}
           <motion.div
@@ -92,25 +95,52 @@ export function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.45 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col sm:flex-row gap-5 justify-center mt-6"
           >
-            <Button
-              size="lg"
-              onClick={() => navigate('apply')}
-              className="bg-white text-blue-900 hover:bg-blue-50 font-bold text-lg px-8 py-6 h-auto rounded-2xl shadow-xl hover:shadow-2xl transition-all border border-white/50"
+            <motion.div
+              animate={{ 
+                scale: [1, 1.05, 1],
+                boxShadow: [
+                  "0px 0px 0px 0px rgba(255,255,255,0.4)",
+                  "0px 0px 0px 15px rgba(255,255,255,0)",
+                  "0px 0px 0px 0px rgba(255,255,255,0)"
+                ]
+              }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              className="rounded-2xl"
             >
-              Apply Now
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => navigate('emi-calculator')}
-              className="border-2 border-amber-500/60 text-white hover:bg-amber-500/15 font-bold text-lg px-8 py-6 h-auto rounded-2xl backdrop-blur-sm transition-all bg-transparent"
+              <Button
+                size="lg"
+                onClick={() => navigate('apply')}
+                className="bg-white text-blue-900 hover:bg-blue-50 font-bold text-lg px-8 py-6 h-auto rounded-2xl shadow-xl hover:shadow-2xl transition-all border border-white/50 w-full sm:w-auto"
+              >
+                Apply Now
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </motion.div>
+
+            <motion.div
+              animate={{ 
+                scale: [1, 1.05, 1],
+                boxShadow: [
+                  "0px 0px 0px 0px rgba(245,158,11,0.4)",
+                  "0px 0px 0px 15px rgba(245,158,11,0)",
+                  "0px 0px 0px 0px rgba(245,158,11,0)"
+                ]
+              }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+              className="rounded-2xl"
             >
-              <Calculator className="mr-2 h-5 w-5" />
-              Calculate EMI
-            </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate('emi-calculator')}
+                className="border-2 border-amber-500 text-white hover:bg-amber-500/15 font-bold text-lg px-8 py-6 h-auto rounded-2xl backdrop-blur-sm transition-all bg-transparent w-full sm:w-auto"
+              >
+                <Calculator className="mr-2 h-5 w-5" />
+                Calculate EMI
+              </Button>
+            </motion.div>
           </motion.div>
 
           {/* Stats */}

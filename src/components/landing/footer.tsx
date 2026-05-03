@@ -15,7 +15,7 @@ export function Footer() {
                 <IndianRupee className="h-5 w-5" />
               </div>
               <div>
-                <span className="text-xl font-bold text-white">MG Finance</span>
+                <span className="text-xl font-bold text-white">MG Finance Services</span>
                 <div className="h-[1.5px] w-10 bg-amber-500 rounded-full mt-0.5" />
               </div>
             </div>

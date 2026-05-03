@@ -30,6 +30,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 
 const LOAN_TYPES = [
+  { value: 'PERSONAL', label: 'Personal Loan', minRate: 10, maxRate: 24 },
   { value: 'MUDRA', label: 'Mudra Loan (मुद्रा योजना)', minRate: 8, maxRate: 12 },
   { value: 'BUSINESS', label: 'Business Loan', minRate: 10, maxRate: 18 },
   { value: 'USED_CAR', label: 'Used Car Loan', minRate: 12, maxRate: 16 },
@@ -564,35 +565,7 @@ export function ApplicationForm() {
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <Label className="text-blue-700">Interest Rate (% p.a.)</Label>
-                      <span className="text-sm font-bold text-blue-700">{form.interestRate}%</span>
-                    </div>
-                    <Slider
-                      value={[form.interestRate]}
-                      onValueChange={([val]) => updateField('interestRate', val)}
-                      min={5}
-                      max={25}
-                      step={0.5}
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <Label className="text-blue-700">Tenure (months)</Label>
-                      <span className="text-sm font-bold text-blue-700">
-                        {form.tenure} months ({Math.floor(form.tenure / 12)}y {form.tenure % 12}m)
-                      </span>
-                    </div>
-                    <Slider
-                      value={[form.tenure]}
-                      onValueChange={([val]) => updateField('tenure', val)}
-                      min={6}
-                      max={360}
-                      step={6}
-                    />
-                  </div>
+                  {/* Interest Rate and Tenure removed as per request */}
 
                   <div className="space-y-2">
                     <Label htmlFor="loanPurpose" className="text-blue-700">Loan Purpose</Label>
@@ -603,13 +576,6 @@ export function ApplicationForm() {
                       placeholder="किसलिए लोन चाहिए"
                       className="h-11"
                     />
-                  </div>
-
-                  <Separator />
-
-                  <div className="p-4 bg-gradient-to-r from-blue-700 to-blue-800 rounded-xl text-white text-center">
-                    <p className="text-sm text-blue-200 mb-1">Your Monthly EMI</p>
-                    <p className="text-3xl font-black">{formatCurrency(emi)}</p>
                   </div>
                 </div>
               )}

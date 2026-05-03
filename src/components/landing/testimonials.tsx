@@ -35,8 +35,8 @@ const testimonials = [
     name: 'Sunita Devi',
     location: 'Dehradun, Uttarakhand',
     loanType: 'Business Loan',
-    quote: 'Meri beauty parlour ko expand karna tha. MG Finance ne aasaan installment par business loan de diya. Ab business double ho gaya hai.',
-    quoteEn: 'I wanted to expand my beauty parlour. MG Finance gave me a business loan on easy installments. Now my business has doubled.',
+    quote: 'Meri beauty parlour ko expand karna tha. MG Finance ne aasaan installment par business loan dilwa diya gya. Ab business double ho gaya hai.',
+    quoteEn: 'I wanted to expand my beauty parlour. MG Finance got me a business loan on easy installments. Now my business has doubled.',
     rating: 4,
   },
 ]
