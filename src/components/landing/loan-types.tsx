@@ -9,11 +9,22 @@ import {
   Home,
   Gem,
   ArrowRight,
+  User,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
 const loanTypes = [
+  {
+    id: 'PERSONAL',
+    name: 'Personal Loan',
+    hindiName: 'पर्सनल लोन',
+    description: 'Get instant personal loans for your personal needs, medical emergencies, or travel.',
+    maxAmount: '₹5 Lakh',
+    interestRate: '10% - 24%',
+    icon: User,
+    color: 'bg-green-100 text-green-700',
+  },
   {
     id: 'MUDRA',
     name: 'Mudra Loan',
@@ -143,7 +154,7 @@ export function LoanTypes() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
         >
           {loanTypes.map((loan) => {
             const Icon = loan.icon
