@@ -26,7 +26,9 @@ export function Footer() {
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="h-4 w-4 text-amber-400 shrink-0" />
               <span>
-                Tarayal Complex, Baniyawala,
+                Tariyal Complex, Hotel Doon,
+                <br />
+                In front of Jayka, Bhaniyawala,
                 <br />
                 Dehradun, Uttarakhand
               </span>
@@ -85,11 +87,11 @@ export function Footer() {
                 +91 78954 07790
               </a>
               <a
-                href="mailto:info@mgfinance.com"
+                href="mailto:mgfinancialservices69@gmail.com"
                 className="flex items-center gap-2 hover:text-amber-400 transition-colors"
               >
                 <Mail className="h-4 w-4 text-amber-400 shrink-0" />
-                info@mgfinance.com
+                <span className="truncate">mgfinancialservices69@gmail.com</span>
               </a>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-amber-400 shrink-0" />

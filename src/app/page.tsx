@@ -7,6 +7,7 @@ import { Hero } from '@/components/landing/hero'
 import { LoanTypes } from '@/components/landing/loan-types'
 import { Testimonials } from '@/components/landing/testimonials'
 import { HowWeWork } from '@/components/landing/how-we-work'
+import { ContactSection } from '@/components/landing/contact-section'
 import { Footer } from '@/components/landing/footer'
 import { LoginForm } from '@/components/auth/login-form'
 import { SignupForm } from '@/components/auth/signup-form'
@@ -84,6 +85,7 @@ export default function Home() {
             <LoanTypes />
             <Testimonials />
             <HowWeWork />
+            <ContactSection />
           </>
         )}
         {currentPage === 'login' && <LoginForm />}
