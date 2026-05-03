@@ -142,7 +142,7 @@ export function ContactSection() {
             <Card className="h-full border-none shadow-xl overflow-hidden rounded-2xl relative group">
               <div className="absolute inset-0 bg-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10" />
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13783.334460592784!2d78.1189498110595!3d30.12642861214013!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39093a388cc10bd7%3A0x6b4dbfc823053336!2sBhaniyawala%2C%20Uttarakhand!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin&q=Tariyal+Complex,+Hotel+Doon,+Bhaniyawala,+Dehradun,+Uttarakhand"
+                src="https://maps.google.com/maps?q=Tariyal%20Complex,%20Hotel%20Doon,%20In%20front%20of%20Jayka,%20Bhaniyawala,%20Dehradun,%20Uttarakhand&t=&z=15&ie=UTF8&iwloc=&output=embed"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
